@@ -11,3 +11,6 @@ src/wwwroot/
 src/Properties/*
 tests
 tools
+backend/compat/
+backend/*_test.go
+backend/backend

@@ -78,9 +78,13 @@ To pin a version, set `APTABASE_IMAGE_TAG` in `.env` to the Release tag. Back up
 before upgrading, then run `docker compose pull` and `docker compose up -d`. The app runs
 database migrations on startup.
 
-PostgreSQL, ClickHouse, and the app's session encryption keys are stored in named volumes
-under the `aptabase-production` Compose project. Keep that project name and those volumes
-when upgrading. Running `docker compose down -v` deletes those volumes.
+PostgreSQL, ClickHouse, and the key ring from earlier releases use named volumes
+under the `aptabase-production` Compose project. Keep that project name and its volumes
+when upgrading. The Go server reads existing login cookies using the original key ring
+and renews them using `AUTH_SECRET`. Keep this secret stable across restarts and replicas.
+Users who started an OAuth sign-in before the upgrade can restart it. If you roll back to
+the .NET release, users with Go-issued sessions need to sign in again. Running
+`docker compose down -v` deletes the volumes.
 
 [Upstream self-hosting guide →](https://github.com/aptabase/self-hosting).
 

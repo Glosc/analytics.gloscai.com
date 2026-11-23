@@ -13,3 +13,5 @@ src/Properties/*
 /tests/IntegrationTests/Properties/launchSettings.json
 /tests/UnitTests/Properties/launchSettings.json
 /.env
+/backend/backend
+__pycache__/

@@ -1,34 +1,27 @@
-# Server Build
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0 AS server
-WORKDIR /work/src
-
-COPY ./src/Aptabase.csproj /work/src
-
+FROM --platform=$BUILDPLATFORM golang:1.26-alpine AS server
+WORKDIR /src
+COPY backend/go.mod backend/go.sum ./
+ARG GOPROXY=https://proxy.golang.org,direct
+RUN go mod download
+COPY backend/ ./
+ARG TARGETOS
 ARG TARGETARCH
-RUN dotnet restore "./Aptabase.csproj" -a $TARGETARCH
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath -ldflags='-s -w' -o /out/aptabase .
 
-COPY ./etc/clickhouse /work/etc/clickhouse
-COPY ./etc/geoip /work/etc/geoip
-COPY ./src /work/src
-
-RUN dotnet publish "Aptabase.csproj" -a $TARGETARCH --no-restore -c Release -o /work/publish /p:UseAppHost=false
-
-# WebApp Build
 FROM --platform=$BUILDPLATFORM node:22 AS webapp
 WORKDIR /work
-
-COPY ./src/package.json ./src/package-lock.json ./
+COPY src/package.json src/package-lock.json ./
 RUN npm ci
-
-COPY ./src ./
+COPY src/ ./
 RUN npm run build
 
-# Final
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+FROM scratch
 WORKDIR /app
-
-COPY --from=server /work/publish .
+ENV HOME=/home/app
+COPY --from=server /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=server /out/aptabase ./aptabase
 COPY --from=webapp /work/wwwroot ./wwwroot
+COPY etc/clickhouse ./etc/clickhouse
+COPY etc/geoip ./etc/geoip
 COPY LICENSE .
-
-ENTRYPOINT ["dotnet", "Aptabase.dll"]
+ENTRYPOINT ["/app/aptabase"]

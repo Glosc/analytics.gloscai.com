@@ -7,11 +7,10 @@ services:
     ports:
       - "127.0.0.1:${APTABASE_PORT:-8080}:8080"
     environment:
-      ASPNETCORE_ENVIRONMENT: Production
-      DOTNET_ENVIRONMENT: Production
-      ASPNETCORE_HTTP_PORTS: "8080"
+      PORT: "8080"
       REGION: SH
       HOME: /home/app
+      ASPNET_DATA_PROTECTION_KEY_DIR: /home/app/.aspnet/DataProtection-Keys
       BASE_URL: ${BASE_URL:?Set BASE_URL to the public HTTPS URL}
       AUTH_SECRET: ${AUTH_SECRET:?Generate an AUTH_SECRET for production}
       DATABASE_URL: "Host=postgres;Port=5432;Username=aptabase;Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD};Database=aptabase"

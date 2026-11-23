@@ -1,25 +1,23 @@
 ## Setting up a development environment
 
-1. Install the [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
-2. Install [Node.js 22](https://nodejs.org/en/download/)
-3. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) or Docker Engine with the Compose plugin
-4. Clone the repo
-5. From the repository root, start the development dependencies with `docker compose -f docker-compose.dev.yml up -d`
-6. Copy `src/Properties/launchSettings.example.json` to `src/Properties/launchSettings.json`
-7. Navigate to `src/` and run `npm install` and `dotnet restore` to install dependencies
-8. While on `src/`, run `dotnet watch` to start the server in watch mode
-9. In another terminal, also on `src/`, run `npm run dev` to start the client in watch mode
-10. Navigate to `https://localhost:3000` to view the app
+Install Go 1.26.5 or newer, Node.js 22, and Docker with the Compose plugin. From the
+repository root, run:
 
-That's it! You're ready to start writing some code 🚀
+```sh
+docker compose -f docker-compose.dev.yml up -d
+npm ci --prefix src
+make dev
+```
 
-**Note:** Emails are sent via Mailcatcher, the UI is available at `http://localhost:1080`
+Open `http://localhost:3000`. Vite proxies requests to `https://localhost:5251`, where
+`go run . -dev` supplies a temporary certificate for local development. PostgreSQL uses
+port `5433`, ClickHouse uses `8123`, and Mailcatcher's web interface uses `1080`.
+Set `DEV_POSTGRES_PORT` in the shell before starting both Compose and `make dev` to use
+another PostgreSQL port. Use `docker compose -f docker-compose.dev.yml down` to stop
+the development services.
 
-Development PostgreSQL uses host port `5433` by default. To use `5432` instead, run
-`DEV_POSTGRES_PORT=5432 docker compose -f docker-compose.dev.yml up -d` and change
-`DATABASE_URL` in `launchSettings.json` to port `5432`. Stop development services with
-`docker compose -f docker-compose.dev.yml down`. The default `docker-compose.yml` is for
-[production deployment](./README.md#-self-hosted), not local development.
+Run backend tests with `go test ./...` from `backend/`. See `backend/compat/README.md` for
+HTTP checks against a disposable stack. Deployment uses the [production Compose file](./README.md#-self-hosted).
 
 ## Changing analytics queries or schema
 

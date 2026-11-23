@@ -1,0 +1,1 @@
+ALTER TABLE apps ADD COLUMN error_quota integer NOT NULL DEFAULT 10000, ADD COLUMN error_count integer NOT NULL DEFAULT 0;

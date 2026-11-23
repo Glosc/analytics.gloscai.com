@@ -1,7 +1,10 @@
-dev: vite-dev dotnet-dev
+.PHONY: dev vite-dev go-dev
+
+dev:
+	$(MAKE) -j2 vite-dev go-dev
 
 vite-dev:
-	cd ./src && npm run dev
+	cd src && npm run dev
 
-dotnet-dev:
-	cd ./src && DOTNET_WATCH_RESTART_ON_RUDE_EDIT=1 dotnet watch
+go-dev:
+	cd backend && ConnectionStrings__mailcatcher="$${ConnectionStrings__mailcatcher:-smtp://localhost:1025}" go run . -dev
