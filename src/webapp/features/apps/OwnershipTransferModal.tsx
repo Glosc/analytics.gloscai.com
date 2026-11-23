@@ -6,6 +6,7 @@ import { IconAlertTriangle, IconX } from "@tabler/icons-react";
 import { Fragment, useState } from "react";
 import { toast } from "sonner";
 import { AppRequestPurpose } from "./app-requests";
+import { useT } from "@i18n/index";
 
 type Props = {
   open: boolean;
@@ -16,6 +17,7 @@ type Props = {
 };
 
 export function OwnershipTransferModal(props: Props) {
+  const t = useT();
   const [processing, setIsProcessing] = useState(false);
 
   const close = () => {
@@ -36,7 +38,7 @@ export function OwnershipTransferModal(props: Props) {
       close();
     } catch (error) {
       setIsProcessing(false);
-      toast.error("Failed: " + error);
+      toast.error(t("Failed: {error}", { error: String(error) }));
     }
   };
 
@@ -80,40 +82,42 @@ export function OwnershipTransferModal(props: Props) {
                 <div className="flex items-center space-x-3">
                   <IconAlertTriangle className="h-6 w-6 text-warning" />
                   <DialogTitle as="h3" className="text-lg font-medium text-warning">
-                    Transfer Ownership
+                    {t("Transfer Ownership")}
                   </DialogTitle>
                 </div>
 
                 <form onSubmit={handleSubmit} className="mt-4">
                   <div className="space-y-4">
                     <p className="text-sm text-muted-foreground">
-                      You are about to transfer ownership of <span className="font-semibold">{props.app.name}</span> to{" "}
-                      <span className="font-semibold">{props.newOwnerEmail}</span>.
+                      {t("You are about to transfer ownership of {app} to {email}.", {
+                        app: props.app.name,
+                        email: props.newOwnerEmail,
+                      })}
                     </p>
 
                     <div className="bg-warning/10 border border-warning/20 rounded-md p-3">
                       <p className="text-sm text-warning-foreground">
-                        <span className="font-semibold">This action cannot be undone.</span> Once the new owner accepts,
-                        you will:
+                        <span className="font-semibold">{t("This action cannot be undone.")}</span>{" "}
+                        {t("Once the new owner accepts, you will:")}
                       </p>
                       <ul className="list-disc ml-4 mt-2 text-sm text-warning-foreground space-y-1">
-                        <li>Lose ownership and billing responsibility</li>
-                        <li>Be added to the sharing list with read-only access</li>
-                        <li>No longer be able to manage app settings</li>
+                        <li>{t("Lose ownership and billing responsibility")}</li>
+                        <li>{t("Be added to the sharing list with read-only access")}</li>
+                        <li>{t("No longer be able to manage app settings")}</li>
                       </ul>
                     </div>
 
                     <p className="text-sm text-muted-foreground">
-                      The new owner will need to accept this transfer request before ownership changes.
+                      {t("The new owner will need to accept this transfer request before ownership changes.")}
                     </p>
                   </div>
 
                   <div className="mt-6 flex space-x-3">
                     <Button variant="destructive" disabled={processing} loading={processing} type="submit">
-                      Transfer Ownership
+                      {t("Transfer Ownership")}
                     </Button>
                     <Button variant="ghost" onClick={close} disabled={processing}>
-                      Cancel
+                      {t("Cancel")}
                     </Button>
                   </div>
                 </form>

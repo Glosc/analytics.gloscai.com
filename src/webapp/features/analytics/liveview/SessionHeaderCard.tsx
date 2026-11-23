@@ -4,6 +4,7 @@ import { formatTime } from "@fns/format-date";
 import { formatNumber } from "@fns/format-number";
 import { IconClick, IconClock, IconDevices, IconUser } from "@tabler/icons-react";
 import { LiveRecentSession } from "../query";
+import { useT } from "@i18n/index";
 
 type Props = {
   appId: string;
@@ -11,6 +12,7 @@ type Props = {
 };
 
 export function SessionHeaderCard(props: Props) {
+  const t = useT();
   const { eventsCount, startedAt, duration, appVersion, countryCode, osName, osVersion, regionName } = props.session;
   const shortSessionId = props.session.id.slice(-8);
 
@@ -22,11 +24,11 @@ export function SessionHeaderCard(props: Props) {
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-1 min-w-[8rem]">
           <IconDevices className="text-muted-foreground h-4 w-4" />
-          <span>Version {appVersion}</span>
+          <span>{t("Version {version}", { version: appVersion })}</span>
         </div>
         <div className="flex items-center gap-1">
           <IconClick className="text-muted-foreground h-4 w-4" />
-          <span>{eventsCount} events</span>
+          <span>{t("{count} events", { count: eventsCount })}</span>
         </div>
       </div>
       <div className="flex items-center gap-4">

@@ -14,14 +14,30 @@ public class AccountClient
         _client = client;
     }
 
-    public async Task CreateAccount(string name, string email)
-    {
-        var response = await _client.PostAsJsonAsync("/api/_auth/register", new { name, email });
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+    public const string DefaultPassword = "IntegrationTest123!";
 
-        var confirmUrl = await MailCatcher.GetLinkSentTo(email);
-        response = await _client.GetAsync(confirmUrl);
-        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
+    public async Task<string> CreateAccount(string name, string? username = null, string? password = null)
+    {
+        username ??= $"user_{Guid.NewGuid():N}"[..20];
+
+        var response = await _client.PostAsJsonAsync("/api/_auth/register", new { name, username, password = password ?? DefaultPassword });
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        return username;
+    }
+
+    public async Task<HttpResponseMessage> Register(string name, string username, string password)
+    {
+        return await _client.PostAsJsonAsync("/api/_auth/register", new { name, username, password });
+    }
+
+    public async Task<HttpResponseMessage> Login(string username, string password)
+    {
+        return await _client.PostAsJsonAsync("/api/_auth/login", new { username, password });
+    }
+
+    public async Task<HttpResponseMessage> GetMe()
+    {
+        return await _client.GetAsync("/api/_auth/me");
     }
 
     public async Task<Application> CreateApp(string name)

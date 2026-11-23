@@ -3,14 +3,16 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Aptabase.Features.Authentication;
 
-public class SignInBodyRequest
+public class LoginBodyRequest
 {
-    [EmailAddress]
-    public string Email { get; set; } = "";
+    [Required]
+    public string Username { get; set; } = "";
+
+    [Required]
+    public string Password { get; set; } = "";
 }
 
 public class RegisterBodyRequest
@@ -18,8 +20,14 @@ public class RegisterBodyRequest
     [StringLength(40, MinimumLength = 2)]
     public string Name { get; set; } = "";
 
-    [EmailAddress]
-    public string Email { get; set; } = "";
+    [Required]
+    [StringLength(40, MinimumLength = 3, ErrorMessage = "Username must be between 3 and 40 characters.")]
+    [RegularExpression("^[a-zA-Z0-9._-]+$", ErrorMessage = "Username may only contain letters, numbers, dots, dashes and underscores.")]
+    public string Username { get; set; } = "";
+
+    [Required]
+    [StringLength(PasswordHasher.MaxPasswordLength, MinimumLength = PasswordHasher.MinPasswordLength, ErrorMessage = "Password must be at least 8 characters.")]
+    public string Password { get; set; } = "";
 }
 
 [ApiController]
@@ -29,37 +37,42 @@ public class AuthController : Controller
     private readonly ILogger _logger;
     private readonly EnvSettings _env;
     private readonly IAuthService _authService;
-    private readonly IAuthTokenManager _tokenManager;
 
     public AuthController(
         ILogger<AuthController> logger,
         EnvSettings env,
-        IAuthService authService,
-        IAuthTokenManager tokenManager)
+        IAuthService authService)
     {
         _env = env ?? throw new ArgumentNullException(nameof(env));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _authService = authService ?? throw new ArgumentNullException(nameof(authService));
-        _tokenManager = tokenManager ?? throw new ArgumentNullException(nameof(tokenManager));
-    }
-
-    [HttpPost("/api/_auth/signin")]
-    public async Task<IActionResult> SignIn([FromBody] SignInBodyRequest body, CancellationToken cancellationToken)
-    {
-        var found = await _authService.SendSignInEmailAsync(body.Email.Trim(), cancellationToken);
-
-        if (!found)
-            return NotFound(new { });
-
-        return Ok(new { });
     }
 
     [HttpPost("/api/_auth/register")]
     [EnableRateLimiting("SignUp")]
     public async Task<IActionResult> Register([FromBody] RegisterBodyRequest body, CancellationToken cancellationToken)
     {
-        await _authService.SendRegisterEmailAsync(body.Name.Trim(), body.Email.Trim(), cancellationToken);
-        return Ok(new { });
+        var (result, user) = await _authService.RegisterAsync(body.Name?.Trim() ?? "", body.Username, body.Password, cancellationToken);
+
+        if (result == RegisterResult.UsernameTaken || user is null)
+            return Conflict(new { error = "username_taken" });
+
+        await _authService.SignInAsync(user);
+        _logger.LogInformation("Registered account {username} (role {role})", user.Username, user.Role);
+
+        return Ok(user);
+    }
+
+    [HttpPost("/api/_auth/login")]
+    [EnableRateLimiting("SignIn")]
+    public async Task<IActionResult> Login([FromBody] LoginBodyRequest body, CancellationToken cancellationToken)
+    {
+        var user = await _authService.SignInWithPasswordAsync(body.Username, body.Password, cancellationToken);
+        if (user is null)
+            return Unauthorized(new { error = "invalid_credentials" });
+
+        await _authService.SignInAsync(user);
+        return Ok(user);
     }
 
     [HttpGet("/api/_auth/github")]
@@ -123,41 +136,5 @@ public class AuthController : Controller
     {
         await _authService.SignOutAsync();
         return Redirect($"{_env.SelfBaseUrl}/auth");
-    }
-
-    [HttpGet("/api/_auth/continue")]
-    public async Task<IActionResult> HandleMagicLink([FromQuery] string token, CancellationToken cancellationToken)
-    {
-        try
-        {
-            var result = _tokenManager.ParseAuthToken(token);
-
-            if (!await _authService.TryConsumeAuthTokenAsync(result, cancellationToken))
-            {
-                _logger.LogWarning("Refused reuse of auth token {tokenId} for {email}", result.Id, result.Email);
-                return Redirect($"{_env.SelfBaseUrl}/auth?error=used");
-            }
-
-            var user = await _authService.FindUserByEmailAsync(result.Email, cancellationToken);
-
-            if (result.Type == AuthTokenType.Register && user == null)
-                user = await _authService.CreateAccountAsync(result.Name, result.Email, cancellationToken);
-
-            if (user != null)
-                await _authService.SignInAsync(user);
-            else
-                _logger.LogError("Tried to authenticate user with email {email}, but account was not found", result.Email);
-        }
-        catch (SecurityTokenExpiredException)
-        {
-            return Redirect($"{_env.SelfBaseUrl}/auth?error=expired");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Unable to validate auth token");
-            return Redirect($"{_env.SelfBaseUrl}/auth?error=invalid");
-        }
-
-        return Redirect($"{_env.SelfBaseUrl}/");
     }
 }

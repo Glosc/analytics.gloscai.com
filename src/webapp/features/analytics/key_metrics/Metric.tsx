@@ -2,6 +2,7 @@ import { GrowthIndicator } from "@components/GrowthIndicator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@components/Tooltip";
 import { formatNumber } from "@fns/format-number";
 import { twJoin, twMerge } from "tailwind-merge";
+import { getLocale, useT } from "@i18n/index";
 
 type Props = {
   label: string;
@@ -14,6 +15,7 @@ type Props = {
 };
 
 export function Metric(props: Props) {
+  const t = useT();
   const Container = props.onClick ? "button" : "div";
 
   const TooltipOnOverflow = (
@@ -39,14 +41,16 @@ export function Metric(props: Props) {
           : formatNumber(props.current, props.format)}
       </div>
       <div className="text-sm text-muted-foreground w-full">
-        {props.label}{" "}
+        {t(props.label)}{" "}
         <div className={twMerge("ml-1 p-1 inline-block rounded", props.activeClassName, !props.active && "hidden")} />
       </div>
       <GrowthIndicator
         className="mt-1 w-full"
         current={props.current}
         previous={props.previous}
-        previousFormatted={`${formatNumber(props.previous ?? 0, props.format)} ${props.label.toLowerCase()}`}
+        previousFormatted={`${formatNumber(props.previous ?? 0, props.format)} ${
+          getLocale() === "zh" ? props.label : props.label.toLowerCase()
+        }`}
       />
     </Container>
   );

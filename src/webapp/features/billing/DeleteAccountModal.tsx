@@ -5,6 +5,7 @@ import { api } from "@fns/api";
 import { Dialog, Transition } from "@headlessui/react";
 import { IconX } from "@tabler/icons-react";
 import { Fragment, useState } from "react";
+import { useT } from "@i18n/index";
 
 async function deleteAccount(): Promise<boolean> {
   const [status] = await api.fetch("POST", `/_auth/account/delete`);
@@ -22,6 +23,7 @@ type Props = {
 };
 
 export function DeleteAccountModal(props: Props) {
+  const t = useT();
   const [confirmation, setConfirmation] = useState("");
   const [processing, setIsProcessing] = useState(false);
 
@@ -80,16 +82,15 @@ export function DeleteAccountModal(props: Props) {
                   </button>
                 </div>
                 <Dialog.Title as="h3" className="text-lg font-medium text-destructive">
-                  Delete Account
+                  {t("Delete Account")}
                 </Dialog.Title>
                 <form onSubmit={handleSubmit} className="mt-2">
                   <p className="text-sm text-muted-foreground mb-4">
-                    This action cannot be undone. This will permanently delete your account and remove all associated
-                    data from our servers.
+                    {t("This action cannot be undone. This will permanently delete your account and remove all associated data from our servers.")}
                   </p>
                   <TextInput
                     name="confirmation"
-                    placeholder="Type 'DELETE' to confirm"
+                    placeholder={t("Type 'DELETE' to confirm")}
                     autoComplete="off"
                     required={true}
                     value={confirmation}
@@ -101,7 +102,7 @@ export function DeleteAccountModal(props: Props) {
                     disabled={confirmation !== "DELETE" || processing}
                     loading={processing}
                   >
-                    Delete Account
+                    {t("Delete Account")}
                   </Button>
                 </form>
               </Dialog.Panel>

@@ -2,6 +2,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { IconX } from "@tabler/icons-react";
 import { Country } from "./dashboard/Country";
 import { OS } from "./dashboard/OS";
+import { useT } from "@i18n/index";
 
 type ChipProps = {
   children: React.ReactNode;
@@ -9,6 +10,7 @@ type ChipProps = {
 };
 
 function FilterChip(props: ChipProps) {
+  const t = useT();
   const targetUrl = new URL(window.location.href);
   targetUrl.searchParams.delete(props.removeProperty);
 
@@ -24,7 +26,7 @@ function FilterChip(props: ChipProps) {
       >
         <span className="flex space-x-2 items-center text-destructive">
           <IconX strokeWidth={1.5} className="h-5 w-5" />
-          <span>Remove</span>
+          <span>{t("Remove")}</span>
         </span>
       </Link>
     </span>
@@ -32,6 +34,7 @@ function FilterChip(props: ChipProps) {
 }
 
 export function CurrentFilters() {
+  const t = useT();
   const [searchParams] = useSearchParams();
   const countryCode = searchParams.get("countryCode") || "";
   const appVersion = searchParams.get("appVersion") || "";
@@ -42,13 +45,13 @@ export function CurrentFilters() {
     <div className="flex items-center gap-2 flex-wrap">
       {eventName && (
         <FilterChip removeProperty="eventName">
-          <span>Event =</span>
+          <span>{t("Event =")}</span>
           <span className="font-bold">{eventName}</span>
         </FilterChip>
       )}
       {appVersion && (
         <FilterChip removeProperty="appVersion">
-          <span>Version =</span>
+          <span>{t("Version =")}</span>
           <span className="font-bold">{appVersion}</span>
         </FilterChip>
       )}

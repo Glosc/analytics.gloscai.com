@@ -16,6 +16,7 @@ import {
 } from "../../../../atoms/widgets-atoms";
 import { Granularity, periodicStats } from "../../query";
 import { EventsChart, EventSeries } from "./EventsChart";
+import { useT } from "@i18n/index";
 
 type WidgetConfigPropsType = {
   selectedEventNames: string[];
@@ -53,6 +54,7 @@ const emptyDefaultEventsChartWidgetConfig: SingleWidgetConfig<EventsChartWidgetC
 )!;
 
 export function EventsChartWidget(props: Props) {
+  const t = useT();
   const { buildMode } = useApps();
   const setWidgetsConfig = useSetAtom(dashboardWidgetsAtom);
   const eventsChartWidgetConfig: SingleWidgetConfig<WidgetConfigPropsType> = useMemo(
@@ -168,7 +170,7 @@ export function EventsChartWidget(props: Props) {
       <div className="flex flex-col gap-2">
         <Button variant="outline" className="w-full" onClick={defineChartClick}>
           <IconWand className="mr-2 h-4 w-4" />
-          Create a custom chart
+          {t("Create a custom chart")}
         </Button>
       </div>
     );

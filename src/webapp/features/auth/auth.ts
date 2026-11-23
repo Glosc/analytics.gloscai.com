@@ -4,7 +4,9 @@ import { trackEvent } from "@aptabase/web";
 export type UserAccount = {
   id: string;
   name: string;
+  username: string;
   email: string;
+  role: "admin" | "user" | string;
   avatarUrl: string;
 };
 
@@ -17,21 +19,43 @@ export async function getOAuthProviders(): Promise<OAuthProviders> {
   return await api.get<OAuthProviders>("/_auth/providers");
 }
 
-export async function requestSignInLink(email: string): Promise<boolean> {
-  const [status, response] = await api.fetch("POST", "/_auth/signin", {
-    email,
+export type LoginOutcome =
+  | { ok: true; user: UserAccount }
+  | { ok: false; reason: "invalid_credentials" | "rate_limited" | "failed" };
+
+export async function login(username: string, password: string): Promise<LoginOutcome> {
+  const [status, response] = await api.fetch("POST", "/_auth/login", {
+    username,
+    password,
   });
 
-  if (status === 404) return false;
-  if (status === 200) return true;
+  if (status === 401) return { ok: false, reason: "invalid_credentials" };
+  if (status === 429) return { ok: false, reason: "rate_limited" };
+  if (status !== 200) {
+    await api.handleError(status, response);
+    return { ok: false, reason: "failed" };
+  }
 
-  await api.handleError(status, response);
-  return false;
+  return { ok: true, user: (await response.json()) as UserAccount };
 }
 
-export async function requestRegisterLink(name: string, email: string): Promise<void> {
-  await api.post("/_auth/register", { name, email });
+export type RegisterOutcome = { ok: true } | { ok: false; reason: "username_taken" | "failed" };
+
+export async function register(name: string, username: string, password: string): Promise<RegisterOutcome> {
+  const [status, response] = await api.fetch("POST", "/_auth/register", {
+    name,
+    username,
+    password,
+  });
+
+  if (status === 409) return { ok: false, reason: "username_taken" };
+  if (status !== 200) {
+    await api.handleError(status, response);
+    return { ok: false, reason: "failed" };
+  }
+
   trackEvent("register");
+  return { ok: true };
 }
 
 export async function me(): Promise<UserAccount | null> {

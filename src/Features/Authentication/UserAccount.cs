@@ -3,11 +3,19 @@ using System.Security.Cryptography;
 
 namespace Aptabase.Features.Authentication;
 
+public static class UserRoles
+{
+    public const string Admin = "admin";
+    public const string User = "user";
+}
+
 public class UserAccount
 {
     public string Id { get; set; } = "";
     public string Name { get; set; } = "";
+    public string Username { get; set; } = "";
     public string Email { get; set; } = "";
+    public string Role { get; set; } = UserRoles.User;
     public string AvatarUrl => GetAvatarUrl();
     public char? LockReason { get; set; }
 
@@ -26,7 +34,10 @@ public class UserAccount
     private static MD5 md5 = MD5.Create();
     private string GetAvatarUrl()
     {
-        var hash = md5.ComputeHash(Encoding.UTF8.GetBytes(Email.Trim().ToLower()));
+        // Gravatar when we know the e-mail, otherwise an identifier that intentionally
+        // misses so the client falls back to generated initials.
+        var seed = !string.IsNullOrWhiteSpace(Email) ? Email.Trim().ToLower() : Username;
+        var hash = md5.ComputeHash(Encoding.UTF8.GetBytes(seed));
         var sb = new StringBuilder();
         foreach (var b in hash)
             sb.Append(b.ToString("x2"));

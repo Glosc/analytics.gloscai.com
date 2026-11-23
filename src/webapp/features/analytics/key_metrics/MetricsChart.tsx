@@ -3,6 +3,7 @@ import { useChartColors } from "@features/theme";
 import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { PeriodicStats } from "../query";
+import { useT } from "@i18n/index";
 
 type Props = {
   hasPartialData: boolean;
@@ -41,8 +42,9 @@ const labels = {
 };
 
 export function MetricsChart(props: Props) {
+  const t = useT();
   const colors = useChartColors();
-  const label = labels[`${props.activeMetric}-${props.granularity}`] ?? "";
+  const label = t(labels[`${props.activeMetric}-${props.granularity}`] ?? "");
 
   const datasets = useMemo(() => {
     return [

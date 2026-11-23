@@ -5,23 +5,25 @@ import { PingSignal } from "@components/PingSignal";
 import { useCurrentApp } from "@features/apps";
 import { IconCopy, IconCheck } from "@tabler/icons-react";
 import { useState } from "react";
+import { useT } from "@i18n/index";
 
 type Props = {
   appId: string;
 };
 
 export function WaitingForEventsContent(props: Props) {
+  const t = useT();
   const app = useCurrentApp();
   const [justCopied, setJustCopied] = useState(false);
 
   return (
     <>
-      <p className="text-center font-semibold">Waiting for the first event...</p>
+      <p className="text-center font-semibold">{t("Waiting for the first event...")}</p>
 
       {app && (
         <div className="text-center">
           <p className="text-muted-foreground text-sm mb-1">
-            App Key for <span className="text-foreground">{app.name}</span>
+            <span className="text-foreground">{t("App Key for {name}", { name: app.name })}</span>
           </p>
           <div className="flex items-center mb-2 gap-2">
             <span className="font-medium text-xl">{app.appKey}</span>
@@ -42,18 +44,18 @@ export function WaitingForEventsContent(props: Props) {
         </div>
       )}
       <p className="text-center text-muted-foreground mx-14">
-        Install an{" "}
+        {t("Install an")}{" "}
         <Link to={`/${props.appId}/instructions`} className="text-foreground underline">
-          Aptabase SDK
+          {t("Aptabase SDK")}
         </Link>{" "}
-        on your app to get started.
+        {t("on your app to get started.")}
       </p>
       <PingSignal color="success" />
       {isSupportEnabled && (
         <div className="w-full space-y-4">
           <hr className="mx-4" />
           <p className="text-xs text-center text-muted-foreground">
-            Need help? <ContactUsLink className="text-white underline">Contact us</ContactUsLink>
+            {t("Need help?")} <ContactUsLink className="text-white underline">{t("Contact us")}</ContactUsLink>
           </p>
         </div>
       )}

@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { LiveRecentSession, liveRecentSessions } from "../query";
 import { SessionHeaderCard } from "./SessionHeaderCard";
 import { useNavigate } from "react-router-dom";
+import { useT } from "@i18n/index";
 
 type Props = {
   appId: string;
@@ -9,6 +10,7 @@ type Props = {
 };
 
 export function RecentSessionsList(props: Props) {
+  const t = useT();
   const navigate = useNavigate();
   const { data } = useQuery({
     queryKey: ["live-sessions", props.appId, props.buildMode],
@@ -26,8 +28,8 @@ export function RecentSessionsList(props: Props) {
 
   return (
     <div>
-      <p className="font-title text-xl">Recent Sessions</p>
-      <p className="mb-4 text-muted-foreground text-sm">Most active sessions in the last hour.</p>
+      <p className="font-title text-xl">{t("Recent Sessions")}</p>
+      <p className="mb-4 text-muted-foreground text-sm">{t("Most active sessions in the last hour.")}</p>
 
       <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
         {sessions.map((s) => (

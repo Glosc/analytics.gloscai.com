@@ -17,6 +17,8 @@ import { useAtomValue } from "jotai";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { dateFilterValuesAtom } from "../../../atoms/date-atoms";
+import { formatDate, formatTime } from "@fns/format-date";
+import { useT } from "@i18n/index";
 import { OSIcon } from "../dashboard/icons/os";
 import { DateFilterContainer } from "../date-filters/DateFilterContainer";
 import { OsFilterDropdown } from "../sessions/filters/OsFilterDropdown";
@@ -84,6 +86,8 @@ async function fetchErrors(
 }
 
 function SeverityBadge({ severity }: { severity: string }) {
+  const t = useT();
+
   if (!severity) {
     return <span className="text-muted-foreground text-xs">—</span>;
   }
@@ -96,7 +100,7 @@ function SeverityBadge({ severity }: { severity: string }) {
 
   return (
     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize ${cls}`}>
-      {severity}
+      {t(severity === "fatal" ? "Fatal" : "Error")}
     </span>
   );
 }
@@ -106,6 +110,7 @@ interface ErrorsListProps {
 }
 
 export function ErrorsList({ appId }: ErrorsListProps) {
+  const t = useT();
   const { buildMode } = useApps();
   const [offset, setOffset] = useState(0);
   const limit = 50;
@@ -212,34 +217,34 @@ export function ErrorsList({ appId }: ErrorsListProps) {
       <div className="mb-6 flex flex-wrap items-center gap-4">
         <div className="flex items-center gap-2">
           <IconFilter className="h-5 w-5 text-muted-foreground" />
-          <span className="text-sm font-medium">Filters:</span>
+          <span className="text-sm font-medium">{t("Filters:")}</span>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Date Range:</span>
+          <span className="text-sm text-muted-foreground">{t("Date Range:")}</span>
           <DateFilterContainer />
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">OS:</span>
+          <span className="text-sm text-muted-foreground">{t("OS:")}</span>
           <OsFilterDropdown appId={appId} onValueChange={(osName) => handleOsNameChange(osName ?? "all")} />
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Error Type:</span>
+          <span className="text-sm text-muted-foreground">{t("Error Type:")}</span>
           <ErrorTypeFilterDropdown appId={appId} value={errorType} onValueChange={handleErrorTypeChange} />
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Severity:</span>
+          <span className="text-sm text-muted-foreground">{t("Severity:")}</span>
           <Select value={severity} onValueChange={handleSeverityChange}>
             <SelectTrigger className="w-32">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="fatal">Fatal</SelectItem>
-              <SelectItem value="error">Error</SelectItem>
+              <SelectItem value="all">{t("All")}</SelectItem>
+              <SelectItem value="fatal">{t("Fatal")}</SelectItem>
+              <SelectItem value="error">{t("Error")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -257,21 +262,21 @@ export function ErrorsList({ appId }: ErrorsListProps) {
                     <th className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold">
                       <div className="flex items-center gap-2">
                         <IconClock className="text-muted-foreground h-5 w-5" />
-                        Timestamp
+                        {t("Timestamp")}
                       </div>
                     </th>
                     <th className="px-3 py-3.5 text-left text-sm font-semibold">
                       <div className="flex items-center gap-2">
                         <IconAlertTriangle className="text-muted-foreground h-5 w-5" />
-                        Error Type
+                        {t("Error Type")}
                       </div>
                     </th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold">Severity</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold">Message</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold">{t("Severity")}</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold">{t("Message")}</th>
                     <th className="px-3 py-3.5 text-left text-sm font-semibold">
                       <div className="flex items-center gap-2">
                         <IconDeviceDesktop className="text-muted-foreground h-5 w-5" />
-                        OS
+                        {t("OS")}
                       </div>
                     </th>
                   </tr>
@@ -284,7 +289,7 @@ export function ErrorsList({ appId }: ErrorsListProps) {
                       onClick={() => setSelectedErrorId(error.errorId)}
                     >
                       <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm">
-                        {new Date(error.timestamp).toLocaleString()}
+                        {formatDate(error.timestamp)} {formatTime(error.timestamp)}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm">{error.errorType}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm">
@@ -311,15 +316,19 @@ export function ErrorsList({ appId }: ErrorsListProps) {
       {data.pagination.total > 0 && (
       <div className="flex justify-between items-center mt-4">
         <div className="text-sm text-muted-foreground">
-          Showing {offset + 1} to {Math.min(offset + limit, data.pagination.total)} of {data.pagination.total} errors
+          {t("Showing {from} to {to} of {total} errors", {
+            from: offset + 1,
+            to: Math.min(offset + limit, data.pagination.total),
+            total: data.pagination.total,
+          })}
         </div>
         <div className="flex gap-2">
           <Button disabled={!hasPreviousPage || isPlaceholderData} variant="ghost" onClick={handlePreviousPage}>
             <IconChevronLeft className="h-4 w-4" />
-            Previous
+            {t("Previous")}
           </Button>
           <Button disabled={!hasNextPage || isPlaceholderData} variant="ghost" onClick={handleNextPage}>
-            Next
+            {t("Next")}
             <IconChevronRight className="h-4 w-4" />
           </Button>
         </div>

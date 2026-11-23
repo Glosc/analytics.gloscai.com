@@ -2,6 +2,7 @@ import { formatDate, formatTime } from "@fns/format-date";
 import { IconClick } from "@tabler/icons-react";
 import { EventPropsList } from "./EventPropsList";
 import { formatNumber } from "@fns/format-number";
+import { useT } from "@i18n/index";
 
 type Props = {
   eventName: string;
@@ -12,6 +13,7 @@ type Props = {
 };
 
 export function EventStep(props: Props) {
+  const t = useT();
   return (
     <div className="relative">
       <span className="absolute left-4 top-4 -ml-px h-full w-0.5 bg-border" />
@@ -25,7 +27,7 @@ export function EventStep(props: Props) {
             {props.distance > 60000
               ? `${formatDate(props.timestamp)} ${formatTime(props.timestamp)}`
               : props.distance > 0
-              ? `${formatNumber(props.distance / 1000, "duration")} later`
+              ? t("{duration} later", { duration: formatNumber(props.distance / 1000, "duration") })
               : ""}
           </div>
           <span className="text-lg">{props.eventName}</span>

@@ -6,9 +6,11 @@ import { useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { BuildModeSelector } from "./mode/BuildModeSelector";
 import { DebugModeBanner } from "./mode/DebugModeBanner";
+import { useT } from "@i18n/index";
 
 Component.displayName = "UserSessionsPage";
 export function Component() {
+  const t = useT();
   const app = useCurrentApp();
   const { buildMode } = useApps();
 
@@ -19,10 +21,10 @@ export function Component() {
   }, []);
 
   return (
-    <Page title="User Sessions">
+    <Page title={t("User Sessions")}>
       {buildMode === "debug" && <DebugModeBanner />}
       <div className="flex justify-between items-center">
-        <PageHeading title="User Sessions" subtitle="Historical list of sessions" />
+        <PageHeading title={t("User Sessions")} subtitle={t("Historical list of sessions")} />
         <div className="flex items-center">
           <BuildModeSelector />
         </div>

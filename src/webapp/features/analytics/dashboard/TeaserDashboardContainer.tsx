@@ -6,6 +6,7 @@ import { Country } from "./Country";
 import { OS } from "./OS";
 import { TopNChart } from "./TopNChart";
 import { Application } from "@features/apps";
+import { useT } from "@i18n/index";
 
 type Props = {
   app: Application;
@@ -13,6 +14,7 @@ type Props = {
 };
 
 export function TeaserDashboardContainer(props: Props) {
+  const t = useT();
   const containerClassName = "min-h-[12rem] bg-background py-4 sm:px-4";
 
   const usersPerHour = [10, 30, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 40, 30, 20, 10, 5, 10, 15, 20, 25, 30, 35, 40];
@@ -21,7 +23,7 @@ export function TeaserDashboardContainer(props: Props) {
     <Page title={props.app.name}>
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <PageHeading title="Dashboard" />
+          <PageHeading title={t("Dashboard")} />
         </div>
         <div className="relative bg-background pt-2">
           <div className="absolute top-0 left-0 h-full w-full backdrop-blur-[6px] z-20 flex justify-center items-start lg:items-center">
@@ -32,16 +34,16 @@ export function TeaserDashboardContainer(props: Props) {
 
           <KeyMetricsContainer>
             <Metric
-              label="Daily Users"
+              label={t("Daily Users")}
               current={42}
               previous={24}
               activeClassName="bg-primary"
               active={true}
               format="number"
             />
-            <Metric label="Sessions" current={94} previous={65} activeClassName="bg-primary" format="number" />
-            <Metric label="Events" activeClassName="bg-foreground" current={3504} previous={2406} format="number" />
-            <Metric label="Avg. Duration" current={340} format="duration" />
+            <Metric label={t("Sessions")} current={94} previous={65} activeClassName="bg-primary" format="number" />
+            <Metric label={t("Events")} activeClassName="bg-foreground" current={3504} previous={2406} format="number" />
+            <Metric label={t("Avg. Duration")} current={340} format="duration" />
           </KeyMetricsContainer>
 
           <MetricsChart
@@ -69,9 +71,9 @@ export function TeaserDashboardContainer(props: Props) {
                   { name: "AU", value: 64 },
                   { name: "DE", value: 50 },
                 ]}
-                title="Countries"
+                title={t("Countries")}
                 defaultFormat="percentage"
-                valueLabel="Sessions"
+                valueLabel={t("Sessions")}
                 renderRow={(item) => <Country countryCode={item.name} />}
               />
             </div>
@@ -86,9 +88,9 @@ export function TeaserDashboardContainer(props: Props) {
                   { name: "Ubuntu", value: 176 },
                   { name: "iPadOS", value: 42 },
                 ]}
-                title="Operating Systems"
+                title={t("Operating Systems")}
                 defaultFormat="percentage"
-                valueLabel="Sessions"
+                valueLabel={t("Sessions")}
                 renderRow={(item) => <OS name={item.name} />}
               />
             </div>
@@ -102,9 +104,9 @@ export function TeaserDashboardContainer(props: Props) {
                   { name: "paywall_shown", value: 680 },
                   { name: "subscribed", value: 453 },
                 ]}
-                title="Events"
+                title={t("Events")}
                 defaultFormat="absolute"
-                valueLabel="Count"
+                valueLabel={t("Count")}
               />
             </div>
             <div className={containerClassName}>
@@ -118,8 +120,8 @@ export function TeaserDashboardContainer(props: Props) {
                   { name: "1.0.0", value: 12 },
                 ]}
                 defaultFormat="percentage"
-                title="App Versions"
-                valueLabel="Sessions"
+                title={t("App Versions")}
+                valueLabel={t("Sessions")}
               />
             </div>
           </div>

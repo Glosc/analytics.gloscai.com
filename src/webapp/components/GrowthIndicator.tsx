@@ -1,5 +1,6 @@
 import { TooltipProvider, TooltipTrigger, TooltipContent, Tooltip } from "@components/Tooltip";
 import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react";
+import { useT } from "@i18n/index";
 
 type Props = {
   current: number;
@@ -9,6 +10,8 @@ type Props = {
 };
 
 export function GrowthIndicator(props: Props) {
+  const t = useT();
+
   if (props.previous === 0 && props.current === 0) return null;
   if (props.previous === undefined || props.previous === 0) return null;
 
@@ -34,7 +37,7 @@ export function GrowthIndicator(props: Props) {
         </TooltipTrigger>
         <TooltipContent>
           <p className="text-muted-foreground">
-            vs <span className="text-foreground">{props.previousFormatted}</span> last period
+            {t("vs")} <span className="text-foreground">{props.previousFormatted}</span> {t("last period")}
           </p>
         </TooltipContent>
       </Tooltip>

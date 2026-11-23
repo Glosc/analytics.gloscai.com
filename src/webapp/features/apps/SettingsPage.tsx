@@ -6,23 +6,25 @@ import { AppSharing } from "./AppSharing";
 import { DangerZone } from "./DangerZone";
 import { GeneralSettings } from "./GeneralSettings";
 import { OwnershipTransfer } from "./OwnershipTransfer";
+import { useT } from "@i18n/index";
 
 Component.displayName = "SettingsPage";
 export function Component() {
+  const t = useT();
   const app = useCurrentApp();
 
   if (!app || !app.hasOwnership) return <Navigate to="/" />;
 
   return (
-    <Page title={`${app.name} - Settings`}>
-      <PageHeading title="Settings" subtitle="Manage your app settings" />
+    <Page title={`${app.name} - ${t("Settings")}`}>
+      <PageHeading title={t("Settings")} subtitle={t("Manage your app settings")} />
 
       <Tabs defaultValue="general" className="mt-8">
         <TabsList>
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="sharing">Sharing</TabsTrigger>
-          <TabsTrigger value="ownership">Ownership Transfer</TabsTrigger>
-          <TabsTrigger value="danger">Danger Zone</TabsTrigger>
+          <TabsTrigger value="general">{t("General")}</TabsTrigger>
+          <TabsTrigger value="sharing">{t("Sharing")}</TabsTrigger>
+          <TabsTrigger value="ownership">{t("Ownership Transfer")}</TabsTrigger>
+          <TabsTrigger value="danger">{t("Danger Zone")}</TabsTrigger>
         </TabsList>
         <TabsContent value="general">
           <GeneralSettings app={app} />

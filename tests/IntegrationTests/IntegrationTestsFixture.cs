@@ -43,10 +43,10 @@ public class IntegrationTestsFixture : IAsyncLifetime, IDisposable
     public async Task InitializeAsync()
     {
         UserA = new AccountClient(CreateClient());
-        await UserA.CreateAccount("Jon Snow", $"jon.snow.{Guid.NewGuid()}@got.com");
+        await UserA.CreateAccount("Jon Snow", $"jon.snow.{Guid.NewGuid():N}"[..30]);
 
         UserB = new AccountClient(CreateClient());
-        await UserB.CreateAccount("Arya Stark", $"arya.stark.{Guid.NewGuid()}@got.com");
+        await UserB.CreateAccount("Arya Stark", $"arya.stark.{Guid.NewGuid():N}"[..30]);
     }
 
     public Task DisposeAsync()

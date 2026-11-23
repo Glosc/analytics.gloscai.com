@@ -1,3 +1,4 @@
+import { useT } from "@i18n/index";
 import { getCountryName } from "./countries";
 
 type Props = {
@@ -5,5 +6,7 @@ type Props = {
 };
 
 export function CountryName(props: Props) {
-  return <>{getCountryName(props.countryCode) || "Unknown"}</>;
+  const t = useT();
+
+  return <>{getCountryName(props.countryCode) || t("Unknown")}</>;
 }

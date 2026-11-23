@@ -14,8 +14,10 @@ import {
 import { useLocation } from "react-router-dom";
 import { NavCategory } from "./NavCategory";
 import { NavItem } from "./NavItem";
+import { useT } from "@i18n/index";
 
 export function NavMenu(props: { onNavigation?: VoidFunction }) {
+  const t = useT();
   const currentApp = useCurrentApp();
   const location = useLocation();
 
@@ -23,56 +25,56 @@ export function NavMenu(props: { onNavigation?: VoidFunction }) {
     <div className="flex flex-col h-full justify-between">
       <div className="space-y-6">
         <NavCategory>
-          <NavItem label="Home" href="/" icon={IconLayoutGrid} onNavigation={props.onNavigation} />
+          <NavItem label={t("Home")} href="/" icon={IconLayoutGrid} onNavigation={props.onNavigation} />
         </NavCategory>
-        <NavCategory title="Application">
+        <NavCategory title={t("Application")}>
           <NavItem
-            label="Dashboard"
+            label={t("Dashboard")}
             disabled={!currentApp}
             href={`/${currentApp?.id}/`}
             icon={IconGraph}
             onNavigation={props.onNavigation}
           />
           <NavItem
-            label="Live View"
+            label={t("Live View")}
             disabled={!currentApp || !!currentApp.lockReason}
             href={`/${currentApp?.id}/live`}
             icon={IconActivityHeartbeat}
             onNavigation={props.onNavigation}
           />
           <NavItem
-            label="User Sessions"
+            label={t("User Sessions")}
             disabled={!currentApp || !!currentApp.lockReason}
             href={`/${currentApp?.id}/sessions${location.search}`}
             icon={IconUsers}
             onNavigation={props.onNavigation}
           />
           <NavItem
-            label="Errors"
+            label={t("Errors")}
             disabled={!currentApp || !!currentApp.lockReason}
             href={`/${currentApp?.id}/errors`}
             icon={IconAlertTriangle}
             onNavigation={props.onNavigation}
           />
           <NavItem
-            label="Export"
+            label={t("Export")}
             disabled={!currentApp || !!currentApp.lockReason}
             href={`/${currentApp?.id}/export`}
             icon={IconCloudDownload}
             onNavigation={props.onNavigation}
           />
           <NavItem
-            label="Instructions"
+            label={t("Instructions")}
             disabled={!currentApp}
             href={`/${currentApp?.id}/instructions`}
             icon={IconCode}
             onNavigation={props.onNavigation}
           />
           <NavItem
-            label="Settings"
+            label={t("Settings")}
             disabled={!currentApp || !currentApp.hasOwnership}
             disabledReason={
-              currentApp && !currentApp.hasOwnership ? "Settings are available only to application owners" : undefined
+              currentApp && !currentApp.hasOwnership ? t("Settings are available only to application owners") : undefined
             }
             href={`/${currentApp?.id}/settings`}
             icon={IconSettings}

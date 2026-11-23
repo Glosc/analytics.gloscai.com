@@ -10,12 +10,14 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { OwnershipTransferModal } from "./OwnershipTransferModal";
 import { AppRequest, AppRequestPurpose } from "./app-requests";
+import { useT } from "@i18n/index";
 
 type Props = {
   app: Application;
 };
 
 export function OwnershipTransfer(props: Props) {
+  const t = useT();
   const [newOwnerEmail, setNewOwnerEmail] = useState("");
   const [showTransferModal, setShowTransferModal] = useState(false);
 
@@ -59,28 +61,29 @@ export function OwnershipTransfer(props: Props) {
       <div className="max-w-[40rem]">
         <div className="flex items-center space-x-2 mb-4">
           <IconCrown className="h-5 w-5 text-foreground" />
-          <h3 className="text-lg font-medium">Transfer Ownership</h3>
+          <h3 className="text-lg font-medium">{t("Transfer Ownership")}</h3>
         </div>
 
         {hasPendingTransfer ? (
           <div className="border border-warning/20 bg-warning/10 rounded-md p-4">
             <div className="flex items-center space-x-2 mb-2">
               <IconClock className="h-4 w-4 text-warning" />
-              <p className="font-medium text-warning-foreground">Transfer Pending</p>
+              <p className="font-medium text-warning-foreground">{t("Transfer Pending")}</p>
             </div>
             <p className="text-sm text-warning-foreground mb-3">
-              Ownership transfer to <span className="font-semibold">{ownershipTransfer.targetUserEmail}</span> is
-              pending approval.
+              {t("Ownership transfer to {email} is pending approval.", {
+                email: ownershipTransfer.targetUserEmail,
+              })}
             </p>
             <Button variant="outline" size="sm" onClick={handleCancelTransfer}>
-              Cancel Transfer
+              {t("Cancel Transfer")}
             </Button>
           </div>
         ) : (
           <form onSubmit={handleTransferSubmit} className="space-y-4">
             <div className="flex items-center space-x-2">
               <TextInput
-                label="Transfer to:"
+                label={t("Transfer to:")}
                 name="newOwnerEmail"
                 type="email"
                 required={true}
@@ -88,10 +91,10 @@ export function OwnershipTransfer(props: Props) {
                 placeholder="new.owner@corp.com"
                 maxLength={300}
                 onChange={(e) => setNewOwnerEmail(e.target.value)}
-                description="Enter the email of the user who will become the new owner."
+                description={t("Enter the email of the user who will become the new owner.")}
               />
               <Button variant="destructive" disabled={newOwnerEmail.length === 0} type="submit">
-                Transfer Ownership
+                {t("Transfer Ownership")}
               </Button>
             </div>
           </form>
@@ -100,21 +103,21 @@ export function OwnershipTransfer(props: Props) {
 
       <Alert className="max-w-[40rem]">
         <IconHelp className="h-4 w-4" />
-        <AlertTitle>How does ownership transfer work?</AlertTitle>
+        <AlertTitle>{t("How does ownership transfer work?")}</AlertTitle>
         <AlertDescription className="text-muted-foreground">
           <ol className="list-decimal mx-4 my-2 space-y-1">
-            <li>Transferring ownership gives another user full control of the app.</li>
-            <li>The new owner becomes responsible for billing and management.</li>
-            <li>You will be added to the sharing list with read-only access.</li>
-            <li>This action requires approval from the new owner.</li>
+            <li>{t("Transferring ownership gives another user full control of the app.")}</li>
+            <li>{t("The new owner becomes responsible for billing and management.")}</li>
+            <li>{t("You will be added to the sharing list with read-only access.")}</li>
+            <li>{t("This action requires approval from the new owner.")}</li>
             <li>
-              <span className="font-bold">This action cannot be undone</span> once accepted.
+              <span className="font-bold">{t("This action cannot be undone")}</span> {t("once accepted.")}
             </li>
           </ol>
 
           <p className="mt-3">
-            <span className="font-bold">Note:</span> Aptabase won't send an email as part of the transfer process. We
-            recommend contacting the new owner directly to let them know about the pending request.
+            <span className="font-bold">{t("Note:")}</span>{" "}
+            {t("Aptabase won't send an email as part of the transfer process. We recommend contacting the new owner directly to let them know about the pending request.")}
           </p>
         </AlertDescription>
       </Alert>

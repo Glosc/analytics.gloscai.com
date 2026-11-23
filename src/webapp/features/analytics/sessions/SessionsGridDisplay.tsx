@@ -5,6 +5,7 @@ import { IconClick, IconClock, IconDeviceDesktop, IconDevices, IconMap, IconUser
 import { useNavigate } from "react-router-dom";
 import { OSIcon } from "../dashboard/icons/os";
 import { LiveRecentSession } from "../query";
+import { useT } from "@i18n/index";
 
 export type SessionStartEndDateFilters = {
   startDate?: string;
@@ -20,6 +21,7 @@ type Props = {
 };
 
 export function SessionsGridDisplay(props: Props) {
+  const t = useT();
   const navigate = useNavigate();
   const sessions = props.sessions;
 
@@ -65,37 +67,37 @@ export function SessionsGridDisplay(props: Props) {
                 <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold sm:pl-6 lg:pl-8">
                   <div className="flex items-center gap-2">
                     <IconUser className="text-muted-foreground h-5 w-5" />
-                    Timestamp
+                    {t("Timestamp")}
                   </div>
                 </th>
                 <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold">
                   <div className="flex items-center gap-2">
                     <IconClock className="text-muted-foreground h-5 w-5" />
-                    Duration
+                    {t("Duration")}
                   </div>
                 </th>
                 <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold">
                   <div className="flex items-center gap-2">
                     <IconClick className="text-muted-foreground h-5 w-5" />
-                    Events
+                    {t("Events")}
                   </div>
                 </th>
                 <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold">
                   <div className="flex items-center gap-2">
                     <IconMap className="text-muted-foreground h-5 w-5" />
-                    Country
+                    {t("Country")}
                   </div>
                 </th>
                 <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6 lg:pr-8">
                   <div className="flex items-center gap-2">
                     <IconDeviceDesktop className="text-muted-foreground h-5 w-5" />
-                    OS
+                    {t("OS")}
                   </div>
                 </th>
                 <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold">
                   <div className="flex items-center gap-2">
                     <IconDevices className="text-muted-foreground h-5 w-5" />
-                    App Version
+                    {t("App Version")}
                   </div>
                 </th>
               </tr>

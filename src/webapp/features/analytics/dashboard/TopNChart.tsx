@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { twMerge } from "tailwind-merge";
 import { TopNSkeleton } from "./TopNSkeleton";
 import { TopNTitle } from "./TopNTitle";
+import { useT } from "@i18n/index";
 
 type Item = {
   name: string;
@@ -31,15 +32,14 @@ type Props = {
   refetch?: (options?: RefetchOptions | undefined) => Promise<QueryObserverResult<any, Error>>;
 };
 
-const defaultRenderRow = (item: Item) => <>{item.name || <i>Empty</i>}</>;
-
 export function TopNChart(props: Props) {
+  const t = useT();
   const [format, setFormat] = useLocalStorage<"absolute" | "percentage">(
     `top_n_${props.id}_format`,
     props.defaultFormat
   );
   const total = props.items.reduce((acc, item) => acc + item.value, 0);
-  const renderRow = props.renderRow ?? defaultRenderRow;
+  const renderRow = props.renderRow ?? ((item: Item) => <>{item.name || <i>{t("Empty")}</i>}</>);
 
   const canChangeFormat = typeof props.valueLabel === "string";
 

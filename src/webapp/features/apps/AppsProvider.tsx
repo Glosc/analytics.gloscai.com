@@ -7,6 +7,7 @@ import { Navigate, useLocation, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Application, createApp, deleteApp, listApps, updateApp } from "./apps";
 import { OwnershipTransferStartupCheck } from "./OwnershipTransferStartupCheck";
+import { useI18n } from "@i18n/index";
 
 type Props = {
   children: React.ReactNode;
@@ -27,6 +28,7 @@ type AppsContextType = {
 const AppsContext = createContext<AppsContextType | undefined>(undefined);
 
 export function AppsProvider(props: Props) {
+  const { t } = useI18n();
   const location = useLocation();
   const [buildMode, setBuildMode] = useLocalStorage<BuildMode>("buildmode", "debug");
 
@@ -34,7 +36,7 @@ export function AppsProvider(props: Props) {
 
   const createAppAndRefresh = async (name: string): Promise<Application> => {
     const app = await createApp(name);
-    toast(`${name} app was created. 🎉`);
+    toast(t("{name} app was created. 🎉", { name }));
     await refetch();
     return app;
   };
@@ -46,7 +48,7 @@ export function AppsProvider(props: Props) {
 
   const updateAppAndRefresh = async (appId: string, name: string, icon: string): Promise<Application> => {
     const app = await updateApp(appId, name, icon);
-    toast(`${name} app was successfully updated.`);
+    toast(t("{name} app was successfully updated.", { name }));
     await refetch();
     return app;
   };

@@ -2,6 +2,7 @@ import { useState, type MouseEvent } from "react";
 import { WorldMapPopup } from "./WorldMapPopup";
 import { projectAbsolute } from "./robinson";
 import { CountryFlag, CountryName } from "@features/geo";
+import { useT } from "@i18n/index";
 
 type Props = {
   regionName: string;
@@ -20,6 +21,7 @@ type TooltipPosition = {
 };
 
 export function MapDataPoint(props: Props) {
+  const t = useT();
   const [tooltip, setTooltip] = useState<TooltipPosition | undefined>(undefined);
 
   const mouseEnter = (evt: MouseEvent) => {
@@ -65,7 +67,8 @@ export function MapDataPoint(props: Props) {
       {tooltip && (
         <WorldMapPopup {...tooltip}>
           <div className="p-2 text-sm">
-            <span className="font-bold">{props.users}</span> recent {props.users === 1 ? "user" : "users"}
+            <span className="font-bold">{props.users}</span>{" "}
+            {t(props.users === 1 ? "recent user" : "recent users")}
             <div className="flex gap-1 items-center justify-between">
               <div>
                 {props.regionName && <span>{props.regionName} ·</span>} <CountryName countryCode={props.countryCode} />

@@ -1,12 +1,14 @@
 import { Chart } from "@components/Chart";
 import { useChartColors } from "@features/theme";
 import { ChartConfigurationCustomTypesPerDataset } from "chart.js";
+import { useT } from "@i18n/index";
 
 type Props = {
   values: number[];
 };
 
 export function DailyUsersChart(props: Props) {
+  const t = useT();
   const colors = useChartColors();
 
   const scales = {
@@ -27,7 +29,7 @@ export function DailyUsersChart(props: Props) {
       datasets: [
         {
           type: "line",
-          label: "Daily Users",
+          label: t("Daily Users"),
           data: props.values,
           borderColor: colors.primary,
           fill: "origin",

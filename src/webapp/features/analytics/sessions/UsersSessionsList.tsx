@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { QueryParams, historicalSessions } from "../query";
 import { UsersSessionsFilters } from "./UsersSessionsFilters";
+import { useT } from "@i18n/index";
 
 const SESSIONS_PAGE_SIZE = 10;
 
@@ -22,6 +23,7 @@ type TopFilterValue = {
 };
 
 export function UserSessionsList(props: Props) {
+  const t = useT();
   const location = useLocation();
   const locationStateFilters = location.state?.sessionFilters;
   const [dateFilters, setDateFilters] = useState<SessionStartEndDateFilters>(locationStateFilters || {});
@@ -99,18 +101,18 @@ export function UserSessionsList(props: Props) {
         {!!dateFilters.sessionId && (
           <Button disabled={isPlaceholderData} variant="ghost" onClick={firstPageClick}>
             <IconChevronsLeft></IconChevronsLeft>
-            First
+            {t("First")}
           </Button>
         )}
         {(!!dateFilters.sessionId || isPlaceholderData) && (
           <Button disabled={isPlaceholderData} variant="ghost" onClick={previousPageClick}>
             <IconChevronLeft></IconChevronLeft>
-            Previous
+            {t("Previous")}
           </Button>
         )}
         {(sessions.length >= SESSIONS_PAGE_SIZE || isPlaceholderData) && (
           <Button disabled={isPlaceholderData} variant="ghost" onClick={nextPageClick}>
-            Next
+            {t("Next")}
             <IconChevronRight></IconChevronRight>
           </Button>
         )}

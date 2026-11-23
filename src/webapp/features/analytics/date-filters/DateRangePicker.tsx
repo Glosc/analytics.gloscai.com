@@ -1,6 +1,7 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/Select";
 import { useAtom } from "jotai";
 import { periodAtom } from "../../../atoms/date-atoms";
+import { useT } from "@i18n/index";
 
 type Option = {
   value: string;
@@ -30,13 +31,15 @@ type StyledOptionProps = {
 };
 
 function Item(props: StyledOptionProps) {
+  const t = useT();
+
   if (props.option.name === "Divider") {
     return <div className="border-t my-1" />;
   }
 
   return (
     <SelectItem key={props.option.value} value={props.option.value}>
-      {props.option.name}
+      {t(props.option.name)}
     </SelectItem>
   );
 }

@@ -1,101 +1,90 @@
-using Aptabase.Features.Notification;
 using Aptabase.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Npgsql;
 using System.Security.Claims;
 using Dapper;
 
 namespace Aptabase.Features.Authentication;
 
+public enum RegisterResult
+{
+    Success,
+    UsernameTaken
+}
+
 public interface IAuthService
 {
-    Task<bool> SendSignInEmailAsync(string email, CancellationToken cancellationToken);
-    Task SendRegisterEmailAsync(string name, string email, CancellationToken cancellationToken);
+    Task<(RegisterResult Result, UserAccount? User)> RegisterAsync(string name, string username, string password, CancellationToken cancellationToken);
+    Task<UserAccount?> SignInWithPasswordAsync(string username, string password, CancellationToken cancellationToken);
     Task SignInAsync(UserAccount user);
     Task SignOutAsync();
     Task<UserAccount?> FindUserByIdAsync(string id, CancellationToken cancellationToken);
+    Task<UserAccount?> FindUserByUsernameAsync(string username, CancellationToken cancellationToken);
     Task<UserAccount?> FindUserByEmailAsync(string email, CancellationToken cancellationToken);
     Task<UserAccount?> FindUserByOAuthProviderAsync(string providerName, string providerUid, CancellationToken cancellationToken);
     Task<UserAccount> FindOrCreateAccountWithOAuthAsync(string name, string email, string providerName, string providerUid, CancellationToken cancellationToken);
-    Task<UserAccount> CreateAccountAsync(string name, string email, CancellationToken cancellationToken);
     Task AttachUserAuthProviderAsync(UserAccount user, string providerName, string providerUid, CancellationToken cancellationToken);
     Task DeleteUserByIdAsync(string id, CancellationToken cancellationToken);
-    Task<bool> TryConsumeAuthTokenAsync(ParsedAuthToken token, CancellationToken cancellationToken);
 }
 
 public class AuthService : IAuthService
 {
+    // A password hash that never matches, used to keep failed sign-ins on par time-wise
+    // with successful ones when the username does not exist.
+    private static readonly string DummyPasswordHash = PasswordHasher.Hash("a-password-that-is-never-correct");
+
+    private const string SingleAdminIndex = "idx_users_single_admin";
+
     private readonly ILogger _logger;
     private readonly IDbContext _db;
-    private readonly IAuthTokenManager _tokenManager;
-    private readonly EnvSettings _env;
-    private readonly IEmailClient _emailClient;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public AuthService(
         ILogger<AuthService> logger,
         IDbContext db,
-        EnvSettings env,
-        IHttpContextAccessor httpContextAccessor,
-        IEmailClient emailClient,
-        IAuthTokenManager tokenManager)
+        IHttpContextAccessor httpContextAccessor)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
-        _env = env ?? throw new ArgumentNullException(nameof(env));
-        _tokenManager = tokenManager ?? throw new ArgumentNullException(nameof(tokenManager));
-        _emailClient = emailClient ?? throw new ArgumentNullException(nameof(emailClient));
-        _db = db ?? throw new ArgumentNullException(nameof(db)); ;
+        _db = db ?? throw new ArgumentNullException(nameof(db));
     }
 
-    public async Task<bool> SendSignInEmailAsync(string email, CancellationToken cancellationToken)
+    public async Task<(RegisterResult Result, UserAccount? User)> RegisterAsync(string name, string username, string password, CancellationToken cancellationToken)
     {
-        var user = await FindUserByEmailAsync(email, cancellationToken);
-        if (user != null)
-        {
-            var token = _tokenManager.CreateAuthToken(AuthTokenType.SignIn, user.Name, user.Email);
-            await _emailClient.SendEmailAsync(email, "Log in to Aptabase", "SignIn", new()
-            {
-                { "name", user.Name },
-                { "url", GenerateAuthUrl(token) }
-            }, cancellationToken);
+        var normalized = NormalizeUsername(username);
+        var displayName = string.IsNullOrWhiteSpace(name) ? normalized : name.Trim();
+        var passwordHash = PasswordHasher.Hash(password);
 
-            return true;
-        }
+        var (user, usernameTaken) = await InsertAccountAsync(NanoId.New(), displayName, normalized, null, passwordHash, cancellationToken);
+        if (user is null)
+            return (usernameTaken ? RegisterResult.UsernameTaken : RegisterResult.UsernameTaken, null);
 
-        return false;
+        return (RegisterResult.Success, user);
     }
 
-    public async Task SendRegisterEmailAsync(string name, string email, CancellationToken cancellationToken)
+    public async Task<UserAccount?> SignInWithPasswordAsync(string username, string password, CancellationToken cancellationToken)
     {
-        var user = await FindUserByEmailAsync(email, cancellationToken);
-        if (user != null)
-        {
-            await SendSignInEmailAsync(email, cancellationToken);
-            return;
-        }
-
-        var token = _tokenManager.CreateAuthToken(AuthTokenType.Register, name, email);
-
-        await _emailClient.SendEmailAsync(email, "Confirm your registration", "Register", new()
-        {
-            { "name", name },
-            { "url", GenerateAuthUrl(token) }
-        }, cancellationToken);
-    }
-
-    public async Task<UserAccount> CreateAccountAsync(string name, string email, CancellationToken cancellationToken)
-    {
-        var userId = NanoId.New();
-        var cmd = new CommandDefinition(
-            "INSERT INTO users (id, name, email, free_quota) VALUES (@userId, @name, @email, 20000)",
-            new { userId, name, email = email.ToLower() },
+        var cmd = new CommandDefinition(@"
+            SELECT id, name, username, coalesce(email, '') AS email, role, password_hash, lock_reason
+            FROM users
+            WHERE username = @username",
+            new { username = NormalizeUsername(username) },
             cancellationToken: cancellationToken
         );
-        
-        await _db.Connection.ExecuteAsync(cmd);
 
-        return new UserAccount(new UserIdentity(userId, name, email));
+        var row = await _db.Connection.QuerySingleOrDefaultAsync<UserWithPassword>(cmd);
+        if (row is null)
+        {
+            // Spend the same work on a missing account as on a wrong password.
+            PasswordHasher.Verify(password, DummyPasswordHash);
+            return null;
+        }
+
+        if (!PasswordHasher.Verify(password, row.PasswordHash))
+            return null;
+
+        return row.ToUserAccount();
     }
 
     public async Task SignOutAsync()
@@ -118,7 +107,9 @@ public class AuthService : IAuthService
         {
             new("id", user.Id),
             new("name", user.Name),
+            new("username", user.Username),
             new("email", user.Email),
+            new("role", user.Role),
         };
 
         var claimsIdentity = new ClaimsIdentity(
@@ -134,30 +125,6 @@ public class AuthService : IAuthService
             CookieAuthenticationDefaults.AuthenticationScheme,
             new ClaimsPrincipal(claimsIdentity),
             authProperties);
-    }
-
-    // Marks a sign-in / registration link as used. Returns false when the same link was already
-    // redeemed, so that a leaked or replayed link can not be used a second time.
-    public async Task<bool> TryConsumeAuthTokenAsync(ParsedAuthToken token, CancellationToken cancellationToken)
-    {
-        var now = DateTime.UtcNow;
-
-        // Used ids only need to be remembered until the token itself has expired.
-        await _db.Connection.ExecuteAsync(new CommandDefinition(
-            "DELETE FROM auth_token_uses WHERE expires_at < @now",
-            new { now },
-            cancellationToken: cancellationToken
-        ));
-
-        var inserted = await _db.Connection.ExecuteAsync(new CommandDefinition(
-            @"INSERT INTO auth_token_uses (token_id, expires_at, used_at)
-              VALUES (@tokenId, @expiresAt, @now)
-              ON CONFLICT (token_id) DO NOTHING",
-            new { tokenId = token.Id, expiresAt = token.ExpiresAt, now },
-            cancellationToken: cancellationToken
-        ));
-
-        return inserted == 1;
     }
 
     public Task DeleteUserByIdAsync(string id, CancellationToken cancellationToken)
@@ -194,13 +161,28 @@ public class AuthService : IAuthService
 
     public async Task<UserAccount?> FindUserByIdAsync(string id, CancellationToken cancellationToken)
     {
-        var cmd = new CommandDefinition($"SELECT id, name, email, lock_reason FROM users WHERE id = @id", new { id }, cancellationToken: cancellationToken);
+        var cmd = new CommandDefinition(@"
+            SELECT id, name, username, coalesce(email, '') AS email, role, lock_reason
+            FROM users WHERE id = @id",
+            new { id }, cancellationToken: cancellationToken);
+        return await _db.Connection.QuerySingleOrDefaultAsync<UserAccount>(cmd);
+    }
+
+    public async Task<UserAccount?> FindUserByUsernameAsync(string username, CancellationToken cancellationToken)
+    {
+        var cmd = new CommandDefinition(@"
+            SELECT id, name, username, coalesce(email, '') AS email, role, lock_reason
+            FROM users WHERE username = @username",
+            new { username = NormalizeUsername(username) }, cancellationToken: cancellationToken);
         return await _db.Connection.QuerySingleOrDefaultAsync<UserAccount>(cmd);
     }
 
     public async Task<UserAccount?> FindUserByEmailAsync(string email, CancellationToken cancellationToken)
     {
-        var cmd = new CommandDefinition($"SELECT id, name, email, lock_reason FROM users WHERE email = @email", new { email = email.ToLower() }, cancellationToken: cancellationToken);
+        var cmd = new CommandDefinition(@"
+            SELECT id, name, username, coalesce(email, '') AS email, role, lock_reason
+            FROM users WHERE email = @email",
+            new { email = email.ToLower() }, cancellationToken: cancellationToken);
         return await _db.Connection.QuerySingleOrDefaultAsync<UserAccount>(cmd);
     }
 
@@ -217,7 +199,7 @@ public class AuthService : IAuthService
             return user;
         }
 
-        user = await CreateAccountAsync(name, email, cancellationToken);
+        user = await CreateOAuthAccountAsync(name, email, cancellationToken);
         await AttachUserAuthProviderAsync(user, providerName, providerUid, cancellationToken);
         return user;
     }
@@ -225,7 +207,7 @@ public class AuthService : IAuthService
     public async Task<UserAccount?> FindUserByOAuthProviderAsync(string providerName, string providerUid, CancellationToken cancellationToken)
     {
         var cmd = new CommandDefinition($@"
-            SELECT u.id, u.name, u.email, u.lock_reason
+            SELECT u.id, u.name, u.username, coalesce(u.email, '') AS email, u.role, u.lock_reason
             FROM user_providers up
             INNER JOIN users u
             ON u.id = up.user_id
@@ -242,5 +224,100 @@ public class AuthService : IAuthService
         return _db.Connection.ExecuteAsync(cmd);
     }
 
-    private string GenerateAuthUrl(string token) => $"{_env.SelfBaseUrl}/api/_auth/continue?token={token}";
+    private async Task<(UserAccount? User, bool UsernameTaken)> InsertAccountAsync(string id, string name, string username, string? email, string? passwordHash, CancellationToken cancellationToken)
+    {
+        // The admin slot is decided inside the INSERT so that two accounts registering at the
+        // same time cannot both become admin; the partial unique index on role is the backstop.
+        const string sql = @"
+            INSERT INTO users (id, name, username, email, password_hash, role, free_quota)
+            SELECT @id, @name, @username, @email, @passwordHash,
+                   CASE
+                       WHEN @forceRole <> '' THEN @forceRole
+                       WHEN EXISTS (SELECT 1 FROM users WHERE role = 'admin') THEN 'user'
+                       ELSE 'admin'
+                   END,
+                   200000000
+            RETURNING id, name, username, coalesce(email, '') AS email, role, lock_reason";
+
+        try
+        {
+            var user = await _db.Connection.QuerySingleAsync<UserAccount>(new CommandDefinition(
+                sql,
+                new { id, name, username, email = string.IsNullOrWhiteSpace(email) ? null : email.ToLower(), passwordHash, forceRole = "" },
+                cancellationToken: cancellationToken
+            ));
+            return (user, false);
+        }
+        catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.UniqueViolation && ex.ConstraintName == SingleAdminIndex)
+        {
+            // Another registration took the admin slot first; this account is a regular user.
+            try
+            {
+                var user = await _db.Connection.QuerySingleAsync<UserAccount>(new CommandDefinition(
+                    sql,
+                    new { id, name, username, email = string.IsNullOrWhiteSpace(email) ? null : email.ToLower(), passwordHash, forceRole = UserRoles.User },
+                    cancellationToken: cancellationToken
+                ));
+                return (user, false);
+            }
+            catch (PostgresException retryEx) when (retryEx.SqlState == PostgresErrorCodes.UniqueViolation)
+            {
+                return (null, true);
+            }
+        }
+        catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.UniqueViolation)
+        {
+            return (null, true);
+        }
+    }
+
+    private async Task<UserAccount> CreateOAuthAccountAsync(string name, string email, CancellationToken cancellationToken)
+    {
+        var baseUsername = BuildUsernameFromEmail(email);
+
+        for (var attempt = 0; attempt < 5; attempt++)
+        {
+            var username = attempt == 0 ? baseUsername : $"{baseUsername}_{NanoId.New()[..6].ToLowerInvariant()}";
+            var (user, usernameTaken) = await InsertAccountAsync(NanoId.New(), name, username, email, null, cancellationToken);
+            if (user is not null)
+                return user;
+            if (!usernameTaken)
+                break;
+        }
+
+        throw new InvalidOperationException($"Unable to allocate a username for {email}");
+    }
+
+    private static string NormalizeUsername(string username) => username.Trim().ToLowerInvariant();
+
+    private static string BuildUsernameFromEmail(string email)
+    {
+        var local = email.Split('@')[0];
+        var cleaned = new string(local.Where(c => char.IsAsciiLetterOrDigit(c) || c is '.' or '_' or '-').ToArray()).ToLowerInvariant();
+        if (cleaned.Length < 3)
+            cleaned = "user";
+
+        return cleaned[..Math.Min(30, cleaned.Length)];
+    }
+
+    private class UserWithPassword
+    {
+        public string Id { get; set; } = "";
+        public string Name { get; set; } = "";
+        public string Username { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Role { get; set; } = UserRoles.User;
+        public string? PasswordHash { get; set; }
+        public char? LockReason { get; set; }
+
+        public UserAccount ToUserAccount() => new()
+        {
+            Id = Id,
+            Name = Name,
+            Username = Username,
+            Email = Email,
+            Role = Role,
+            LockReason = LockReason,
+        };
+    }
 }

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { atomWithSearchParam } from "../../../../atoms/location-atoms";
 import { FilterDropdownQuery } from "./FilterDropdownQuery";
 import { FilterDropdownSelect } from "./FilterDropdownSelect";
+import { useT } from "@i18n/index";
 
 type Props = {
   appId: string;
@@ -13,6 +14,7 @@ type Props = {
 const appVersionAtom = atomWithSearchParam("appVersion");
 
 export function AppVersionDropdown(props: Props) {
+  const t = useT();
   const [selectedAppVersion, setSelectedAppVersion] = useAtom(appVersionAtom);
 
   if (props.onValueChange) {
@@ -28,7 +30,7 @@ export function AppVersionDropdown(props: Props) {
           value={selectedAppVersion}
           onValueChange={setSelectedAppVersion}
           data={data}
-          placeholder="Select App Version"
+          placeholder={t("Select App Version")}
         />
       )}
     </FilterDropdownQuery>

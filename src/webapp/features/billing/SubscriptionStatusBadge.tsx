@@ -1,3 +1,5 @@
+import { useT } from "@i18n/index";
+
 /*
 Possible statuses:
 - active
@@ -18,6 +20,7 @@ const statuses: Record<string, [string, string]> = {
 };
 
 export function SubscriptionStatusBadge(props: { status: string }) {
+  const t = useT();
   const [statusFormatted, color] = statuses[props.status] ?? [props.status, ""];
-  return <span className={color}>{statusFormatted}</span>;
+  return <span className={color}>{t(statusFormatted)}</span>;
 }

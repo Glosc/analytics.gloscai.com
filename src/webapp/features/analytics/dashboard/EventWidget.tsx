@@ -3,12 +3,14 @@ import { TopNDataContainer } from "./TopNDataContainer";
 import { topEvents } from "../query";
 import { TopEventProps } from "./TopEventProps";
 import { TopNChart } from "./TopNChart";
+import { useT } from "@i18n/index";
 
 type Props = {
   appId: string;
 };
 
 export function EventWidget(props: Props) {
+  const t = useT();
   const [searchParams] = useSearchParams();
   const eventName = searchParams.get("eventName") || "";
 
@@ -23,11 +25,11 @@ export function EventWidget(props: Props) {
           {...data}
           id="events"
           key="events"
-          title="Events"
+          title={t("Events")}
           searchParamKey="eventName"
           pathname={`/${props.appId}/`}
           defaultFormat="absolute"
-          valueLabel="Count"
+          valueLabel={t("Count")}
         />
       )}
     </TopNDataContainer>

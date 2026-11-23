@@ -10,9 +10,11 @@ import { RecentSessionsList } from "./liveview/RecentSessionsList";
 import { WorldMap } from "./liveview/world/WorldMap";
 import { BuildModeSelector } from "./mode/BuildModeSelector";
 import { DebugModeBanner } from "./mode/DebugModeBanner";
+import { useT } from "@i18n/index";
 
 Component.displayName = "LiveViewPage";
 export function Component() {
+  const t = useT();
   const { buildMode } = useApps();
   const app = useCurrentApp();
 
@@ -32,9 +34,9 @@ export function Component() {
 
   const subtitle = () => {
     if (isLoading) return "";
-    if (totalUsers === 0) return "No users in the last hour";
-    if (totalUsers === 1) return "1 user in the last hour";
-    return `${totalUsers} users in the last hour`;
+    if (totalUsers === 0) return t("No users in the last hour");
+    if (totalUsers === 1) return t("1 user in the last hour");
+    return t("{count} users in the last hour", { count: totalUsers });
   };
 
   const aside = () => {
@@ -43,10 +45,10 @@ export function Component() {
   };
 
   return (
-    <Page title="Live View">
+    <Page title={t("Live View")}>
       {buildMode === "debug" && <DebugModeBanner />}
       <div className="flex justify-between items-center">
-        <PageHeading title="Live View" aside={aside()} subtitle={subtitle()} />
+        <PageHeading title={t("Live View")} aside={aside()} subtitle={subtitle()} />
         <div className="flex items-center">
           <BuildModeSelector />
         </div>

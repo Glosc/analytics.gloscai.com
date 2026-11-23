@@ -1,5 +1,6 @@
 import { IconArrowBackUp } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
+import { useT } from "@i18n/index";
 
 type Props = {
   backProperty?: string;
@@ -7,6 +8,8 @@ type Props = {
 };
 
 export function TopNTitle(props: Props) {
+  const t = useT();
+
   if (!props.backProperty) {
     return <span className="font-medium mb-1">{props.children}</span>;
   }
@@ -25,7 +28,7 @@ export function TopNTitle(props: Props) {
           className="text-sm items-center space-x-2 absolute m-2 hidden group-hover:flex transition-all"
           preventScrollReset={true}
         >
-          <IconArrowBackUp strokeWidth={1.75} className="h-5 w-5" /> <span>Back</span>
+          <IconArrowBackUp strokeWidth={1.75} className="h-5 w-5" /> <span>{t("Back")}</span>
         </Link>
       )}
     </span>

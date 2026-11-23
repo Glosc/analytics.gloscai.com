@@ -1,20 +1,7 @@
 import { PingSignal } from "@components/PingSignal";
 import { twMerge } from "tailwind-merge";
-
-const months = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
+import { formatMonthName } from "@fns/format-date";
+import { useT } from "@i18n/index";
 
 type Props = {
   month: number;
@@ -30,22 +17,25 @@ const colors = {
 };
 
 export function CurrentUsage(props: Props) {
+  const t = useT();
   const percentage = (props.usage / props.quota) * 100;
 
   return (
     <div className="flex flex-col h-full justify-between">
       <div className="flex items-center mb-1 justify-between">
-        <span>Usage</span>
+        <span>{t("Usage")}</span>
         <span className="text-sm text-muted-foreground">
-          {months[props.month - 1]} / {props.year}
+          {formatMonthName(props.month)} / {props.year}
         </span>
       </div>
       <div className="space-y-1">
         <div className="text-sm flex items-center space-x-1">
           <span>{props.usage.toLocaleString()}</span>
           <span className="text-muted-foreground">
-            / {props.quota.toLocaleString()} events ({percentage.toFixed(2)}
-            %)
+            {t("/ {quota} events ({percentage}%)", {
+              quota: props.quota.toLocaleString(),
+              percentage: percentage.toFixed(2),
+            })}
           </span>
           {props.state === "OVERUSE" && <PingSignal color="warning" size="xs" />}
         </div>

@@ -1,4 +1,5 @@
 import { IconAlertTriangle } from "@tabler/icons-react";
+import { useT } from "@i18n/index";
 
 type Props = {
   reason: string;
@@ -17,6 +18,7 @@ const desriptions: Record<string, string> = {
 };
 
 export function AppLockedContent(props: Props) {
+  const t = useT();
   const title = titles[props.reason] || "App is locked";
   const description = desriptions[props.reason] || "Contact support to unlock";
 
@@ -24,8 +26,8 @@ export function AppLockedContent(props: Props) {
     <>
       <IconAlertTriangle className="text-warning h-5 w-5" />
       <div>
-        <p className="text-center">{title}</p>
-        <p className="text-center text-muted-foreground">{description}</p>
+        <p className="text-center">{t(title)}</p>
+        <p className="text-center text-muted-foreground">{t(description)}</p>
       </div>
     </>
   );

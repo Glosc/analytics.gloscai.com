@@ -1,17 +1,20 @@
+import { getLocale } from "@i18n/index";
 import { FormatDurationOptions, formatDuration, intervalToDuration } from "date-fns";
 
-const formatDistanceLocale: Record<string, string> = {
-  xSeconds: "{{count}}s",
-  xMinutes: "{{count}}m",
-  xHours: "{{count}}h",
-};
+function durationFormat(): FormatDurationOptions {
+  const locale = getLocale();
+  const tokens: Record<string, string> =
+    locale === "zh"
+      ? { xSeconds: "{{count}}秒", xMinutes: "{{count}}分", xHours: "{{count}}小时" }
+      : { xSeconds: "{{count}}s", xMinutes: "{{count}}m", xHours: "{{count}}h" };
 
-const durationFormat: FormatDurationOptions = {
-  format: ["hours", "minutes", "seconds"],
-  locale: {
-    formatDistance: (token, count) => formatDistanceLocale[token].replace("{{count}}", count.toString()),
-  },
-};
+  return {
+    format: ["hours", "minutes", "seconds"],
+    locale: {
+      formatDistance: (token, count) => tokens[token].replace("{{count}}", count.toString()),
+    },
+  };
+}
 
 function formatLargeNumber(num: number): string {
   if (num >= 1e6) {
@@ -24,14 +27,14 @@ function formatLargeNumber(num: number): string {
 
 export function formatNumber(value: number | undefined, format?: "number" | "duration"): string {
   if (format === "duration") {
-    if (!value || value < 1) return "0s";
+    if (!value || value < 1) return getLocale() === "zh" ? "0秒" : "0s";
 
     const interval = intervalToDuration({
       start: 0,
       end: (value ?? 0) * 1000,
     });
 
-    return formatDuration(interval, durationFormat);
+    return formatDuration(interval, durationFormat());
   }
 
   return formatLargeNumber(value ?? 0);

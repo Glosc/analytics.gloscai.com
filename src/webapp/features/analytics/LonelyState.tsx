@@ -4,8 +4,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@components/Button";
 import { TextInput } from "@components/TextInput";
+import { useT } from "@i18n/index";
 
 export function LonelyState() {
+  const t = useT();
   const user = useAuth();
   const { createApp } = useApps();
   const navigate = useNavigate();
@@ -22,16 +24,16 @@ export function LonelyState() {
 
   return (
     <div className="mx-auto pt-8 lg:pt-24 max-w-3xl text-base">
-      <h2 className="text-3xl font-bold sm:text-4xl">👋 Hey {user.name}</h2>
+      <h2 className="text-3xl font-bold sm:text-4xl">{t("👋 Hey {name}", { name: user.name })}</h2>
       <p className="mt-8 text-muted-foreground">
-        Register your application and configure the analytics SDK to get started.
+        {t("Register your application and configure the analytics SDK to get started.")}
       </p>
 
       <form onSubmit={handleSubmit} className="mt-8">
         <TextInput
-          label="What's your app name?"
+          label={t("What's your app name?")}
           name="name"
-          placeholder="App Name"
+          placeholder={t("App Name")}
           autoComplete="off"
           required={true}
           className="w-80"
@@ -39,10 +41,10 @@ export function LonelyState() {
           onChange={(e) => setName(e.target.value)}
         />
         <p className="text-sm text-muted-foreground mt-1">
-          A friendly name to identify your app. You can change it later.
+          {t("A friendly name to identify your app. You can change it later.")}
         </p>
         <Button className="mt-4" disabled={name.length < 2 || name.length > 40 || processing}>
-          Create
+          {t("Create")}
         </Button>
       </form>
     </div>

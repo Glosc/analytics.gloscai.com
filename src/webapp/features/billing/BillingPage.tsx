@@ -9,9 +9,11 @@ import { CurrentUsage } from "./CurrentUsage";
 import { DeleteAccountModal } from "./DeleteAccountModal";
 import { MonthlyUsageChart } from "./MonthlyUsageChart";
 import { BillingHistoricalUsage, BillingInfo, useBilling, useHistoricalData } from "./useBilling";
+import { useT } from "@i18n/index";
 
 Component.displayName = "BillingPage";
 export function Component() {
+  const t = useT();
   const { isLoading: isLoadingBilling, isError: isErrorBilling, data: billing } = useBilling();
   const { isLoading: isLoadingHistorical, isError: isErrorHistorical, data: historical } = useHistoricalData();
 
@@ -19,8 +21,8 @@ export function Component() {
   const isError = isErrorBilling || isErrorHistorical;
 
   return (
-    <Page title="Billing">
-      <PageHeading title="Billing" subtitle="Manage your subscription" />
+    <Page title={t("Billing")}>
+      <PageHeading title={t("Billing")} subtitle={t("Manage your subscription")} />
 
       <div className="flex flex-col gap-8 max-w-3xl mt-8">
         {isLoading && <LoadingState />}
@@ -32,6 +34,7 @@ export function Component() {
 }
 
 function Body(props: { billing: BillingInfo; historical: BillingHistoricalUsage[] }) {
+  const t = useT();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const openDeleteModal = () => setShowDeleteModal(true);
   const closeDeleteModal = () => setShowDeleteModal(false);
@@ -53,7 +56,7 @@ function Body(props: { billing: BillingInfo; historical: BillingHistoricalUsage[
         </div>
       </div>
       <div>
-        <p>Monthly Usage</p>
+        <p>{t("Monthly Usage")}</p>
 
         <div className="h-60 mt-4">
           <MonthlyUsageChart
@@ -67,24 +70,24 @@ function Body(props: { billing: BillingInfo; historical: BillingHistoricalUsage[
         <div className="flex items-center justify-end text-xs text-muted-foreground gap-4 mt-2 mr-4">
           <div className="space-x-1">
             <div className="bg-success w-2 h-2 rounded-full inline-block" />
-            <span>Limit</span>
+            <span>{t("Limit")}</span>
           </div>
 
           <div className="space-x-1">
             <div className="bg-primary w-2 h-2 rounded-full inline-block" />
-            <span>Usage</span>
+            <span>{t("Usage")}</span>
           </div>
         </div>
       </div>
 
       <div className="mt-12">
-        <PageHeading title="Danger Zone" subtitle="Be careful with these actions" />
+        <PageHeading title={t("Danger Zone")} subtitle={t("Be careful with these actions")} />
         <div className="border-[0.5px] border-destructive rounded-md mt-4">
           <DangerZoneItem
-            title="Delete Account"
-            description="Once you delete your account, there is no going back."
-            subDescription="All events and associated data will be permanently erased from our database."
-            actionText="Delete account"
+            title={t("Delete Account")}
+            description={t("Once you delete your account, there is no going back.")}
+            subDescription={t("All events and associated data will be permanently erased from our database.")}
+            actionText={t("Delete account")}
             onClick={openDeleteModal}
           />
         </div>

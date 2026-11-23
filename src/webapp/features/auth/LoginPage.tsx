@@ -1,4 +1,4 @@
-import { requestSignInLink, useOAuthProviders } from "@features/auth";
+import { login, useOAuthProviders } from "@features/auth";
 import { Page } from "@components/Page";
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -10,65 +10,55 @@ import { SignInWithGoogle } from "./SignInWithGoogle";
 import { Logo } from "./Logo";
 import { Button } from "@components/Button";
 import { TextInput } from "@components/TextInput";
+import { LanguageSwitch } from "@components/LanguageSwitch";
+import { useT } from "@i18n/index";
 
-type FormStatus = "idle" | "loading" | "success" | "notfound";
+type FormStatus = "idle" | "loading";
 
 type StatusMessageProps = {
   status: FormStatus;
+  error: string | null;
 };
-
-const SignUpMessage = () => (
-  <span className="block">
-    Don't have an account?{" "}
-    <Link className="font-semibold text-foreground" to="/auth/register">
-      Sign up
-    </Link>{" "}
-    for free.
-  </span>
-);
 
 const StatusMessage = (props: StatusMessageProps) => {
-  if (props.status === "success") {
-    return <span className="text-success">Woo-hoo! Email sent, go check your inbox!</span>;
+  const t = useT();
+
+  if (props.error) {
+    return <span className="text-destructive">{props.error}</span>;
   }
 
-  if (props.status === "notfound") {
-    return (
-      <>
-        <span className="text-destructive">Could not find an account with that email.</span>
-        <SignUpMessage />
-      </>
-    );
-  }
-
-  return <SignUpMessage />;
+  return (
+    <span className="block">
+      {t("Don't have an account?")}{" "}
+      <Link className="font-semibold text-foreground" to="/auth/register">
+        {t("Sign up for free.")}
+      </Link>
+    </span>
+  );
 };
 
-const RedirectErrorMessage = () => {
+const OAuthErrorMessage = () => {
+  const t = useT();
   const [params] = useSearchParams();
 
-  const error = params.get("error");
-  if (!error) {
+  if (params.get("error") !== "oauth_failed") {
     return null;
   }
-  const message =
-    error === "expired"
-      ? "This link has expired."
-      : error === "used"
-        ? "This link has already been used."
-        : "This link is invalid.";
 
   return (
     <p className="mx-auto text-center mb-10 text-destructive text-sm">
-      {message} Please request a new one.
+      {t("Sign in failed. Please try again.")}
     </p>
   );
 };
 
 Component.displayName = "LoginPage";
 export function Component() {
-  const [email, setEmail] = useState("");
+  const t = useT();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [status, setStatus] = useState<FormStatus>("idle");
+  const [error, setError] = useState<string | null>(null);
 
   const providers = useOAuthProviders();
   const showOAuth = providers.github || providers.google;
@@ -76,20 +66,40 @@ export function Component() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setStatus("loading");
+    setError(null);
 
-    const found = await requestSignInLink(email);
-    setStatus(found ? "success" : "notfound");
+    let result;
+    try {
+      result = await login(username, password);
+    } catch {
+      setStatus("idle");
+      return;
+    }
+
+    if (!result.ok) {
+      setError(
+        result.reason === "rate_limited"
+          ? t("Too many sign-in attempts. Please wait a few minutes and try again.")
+          : result.reason === "invalid_credentials"
+            ? t("Incorrect username or password.")
+            : t("Something went wrong. Please try again.")
+      );
+      setStatus("idle");
+      return;
+    }
+
+    location.href = "/";
   };
 
   return (
-    <Page title="Login">
+    <Page title={t("Login")}>
       <div className="mx-auto text-center mb-10">
-        <RedirectErrorMessage />
+        <OAuthErrorMessage />
       </div>
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Logo className="mx-auto h-12 w-auto text-primary" />
-        <h2 className="text-center text-3xl text-foreground font-bold">Sign in to your account</h2>
+        <h2 className="text-center text-3xl text-foreground font-bold">{t("Sign in to your account")}</h2>
         <DataResidency />
       </div>
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -106,7 +116,7 @@ export function Component() {
                   <div className="w-full border-t" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-muted">OR</span>
+                  <span className="px-2 bg-muted">{t("OR")}</span>
                 </div>
               </div>
             </>
@@ -114,23 +124,36 @@ export function Component() {
 
           <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
             <TextInput
-              label="Enter your email address"
-              name="email"
-              type="email"
-              placeholder="peter.parker@corp.com"
-              autoComplete="email"
-              value={email}
+              label={t("Username")}
+              name="username"
+              type="text"
+              placeholder="peter.parker"
+              autoComplete="username"
+              value={username}
               required={true}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => setUsername(e.target.value)}
             />
-            <Button loading={status === "loading"}>Send magic link</Button>
+            <TextInput
+              label={t("Password")}
+              name="password"
+              type="password"
+              placeholder="••••••••"
+              autoComplete="current-password"
+              value={password}
+              required={true}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <Button loading={status === "loading"}>{t("Sign in")}</Button>
             <p className="text-center text-sm h-10 text-muted-foreground">
-              <StatusMessage status={status} />
+              <StatusMessage status={status} error={error} />
             </p>
           </form>
         </div>
         <LegalNotice operation="signin" />
         <RegionSwitch />
+        <div className="mt-4 flex justify-center">
+          <LanguageSwitch />
+        </div>
       </div>
     </Page>
   );

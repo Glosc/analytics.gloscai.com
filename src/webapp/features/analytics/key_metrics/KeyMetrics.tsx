@@ -6,6 +6,7 @@ import { dateFilterValuesAtom } from "../../../atoms/date-atoms";
 import { keyMetrics } from "../query";
 import { Metric } from "./Metric";
 import { KeyMetricsContainer } from "./MetricsContainer";
+import { useT } from "@i18n/index";
 
 type Props = {
   appId: string;
@@ -14,6 +15,7 @@ type Props = {
 };
 
 export function KeyMetrics(props: Props) {
+  const t = useT();
   const { buildMode } = useApps();
   const [searchParams] = useSearchParams();
   const { startDateIso, endDateIso, granularity } = useAtomValue(dateFilterValuesAtom);
@@ -59,7 +61,7 @@ export function KeyMetrics(props: Props) {
       {!isLoading && !isError && (
         <>
           <Metric
-            label="Daily Users"
+            label={t("Daily Users")}
             current={metrics?.current.dailyUsers ?? 0}
             previous={metrics?.previous?.dailyUsers}
             activeClassName="bg-primary"
@@ -68,7 +70,7 @@ export function KeyMetrics(props: Props) {
             format="number"
           />
           <Metric
-            label="Sessions"
+            label={t("Sessions")}
             current={metrics?.current.sessions ?? 0}
             previous={metrics?.previous?.sessions}
             activeClassName="bg-primary"
@@ -77,7 +79,7 @@ export function KeyMetrics(props: Props) {
             format="number"
           />
           <Metric
-            label="Events"
+            label={t("Events")}
             current={metrics?.current.events ?? 0}
             previous={metrics?.previous?.events}
             activeClassName="bg-primary"
@@ -86,7 +88,7 @@ export function KeyMetrics(props: Props) {
             format="number"
           />
           <Metric
-            label="Avg. Duration"
+            label={t("Avg. Duration")}
             current={metrics?.current.durationSeconds || 0}
             previous={metrics?.previous?.durationSeconds}
             format="duration"

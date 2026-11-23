@@ -4,9 +4,13 @@ import mkcert from "vite-plugin-mkcert";
 import { defineConfig } from "vite";
 const pkg = require("./package.json");
 
+// Local dev over plain HTTP by default. Set USE_HTTPS=1 to restore
+// the original HTTPS + mkcert setup (requires trusting the mkcert CA).
+const useHttps = process.env.USE_HTTPS === "1";
+
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), mkcert()],
+  plugins: [react(), ...(useHttps ? [mkcert()] : [])],
   define: {
     "import.meta.env.APP_VERSION": JSON.stringify(pkg.version),
   },
@@ -25,9 +29,9 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 3000,
-    https: true,
+    https: useHttps,
     headers: {
-      "Content-Security-Policy": `default-src 'self' 'unsafe-inline'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://client.crisp.chat; script-src 'self' 'unsafe-inline' https://client.crisp.chat; font-src 'self' https://client.crisp.chat; connect-src https://raw.githubusercontent.com wss://client.relay.crisp.chat https://client.crisp.chat wss://localhost:3000 https://localhost:3000`,
+      "Content-Security-Policy": `default-src 'self' 'unsafe-inline'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://client.crisp.chat; script-src 'self' 'unsafe-inline' https://client.crisp.chat; font-src 'self' https://client.crisp.chat; connect-src https://raw.githubusercontent.com wss://client.relay.crisp.chat https://client.crisp.chat ws://localhost:3000 wss://localhost:3000 http://localhost:3000 https://localhost:3000`,
     },
     proxy: {
       "/uploads": {
@@ -65,6 +69,10 @@ export default defineConfig({
       {
         find: "@features",
         replacement: path.resolve(__dirname, "./webapp/features"),
+      },
+      {
+        find: "@i18n",
+        replacement: path.resolve(__dirname, "./webapp/i18n"),
       },
     ],
   },

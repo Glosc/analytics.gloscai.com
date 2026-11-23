@@ -19,7 +19,8 @@
       "@fns/*": ["./webapp/fns/*"],
       "@hooks/*": ["./webapp/hooks/*"],
       "@components/*": ["./webapp/components/*"],
-      "@features/*": ["./webapp/features/*"]
+      "@features/*": ["./webapp/features/*"],
+      "@i18n/*": ["./webapp/i18n/*"]
     }
   },
   "references": [{ "path": "./tsconfig.node.json" }]

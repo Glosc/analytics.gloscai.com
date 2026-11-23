@@ -2,8 +2,10 @@ import { Link } from "react-router-dom";
 import { useBilling } from "./useBilling";
 import { Alert, AlertDescription } from "@components/Alert";
 import { isBillingEnabled } from "@features/env";
+import { useT } from "@i18n/index";
 
 export function TrialReminder() {
+  const t = useT();
   const { data: billing } = useBilling();
 
   if (!isBillingEnabled || !billing || !billing.plan.freeTrialEndsAt) return null;
@@ -18,8 +20,13 @@ export function TrialReminder() {
     <Link to="/billing">
       <Alert variant="warning" className="p-2">
         <AlertDescription className="text-sm">
-          Trial{" "}
-          {days === 1 ? `ends tomorrow` : days > 0 ? `ends in ${days} days` : days === 0 ? "ends today" : "expired"}
+          {days === 1
+            ? t("Trial ends tomorrow")
+            : days > 0
+              ? t("Trial ends in {days} days", { days })
+              : days === 0
+                ? t("Trial ends today")
+                : t("Trial expired")}
         </AlertDescription>
       </Alert>
     </Link>

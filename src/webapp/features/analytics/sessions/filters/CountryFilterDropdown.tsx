@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { atomWithSearchParam } from "../../../../atoms/location-atoms";
 import { FilterDropdownQuery } from "./FilterDropdownQuery";
 import { FilterDropdownSelect } from "./FilterDropdownSelect";
+import { useT } from "@i18n/index";
 
 type Props = {
   appId: string;
@@ -13,6 +14,7 @@ type Props = {
 const countryAtom = atomWithSearchParam("country");
 
 export function CountryFilterDropdown(props: Props) {
+  const t = useT();
   const [selectedCountry, setSelectedCountry] = useAtom(countryAtom);
 
   if (props.onValueChange) {
@@ -28,7 +30,7 @@ export function CountryFilterDropdown(props: Props) {
           value={selectedCountry}
           onValueChange={setSelectedCountry}
           data={data}
-          placeholder="Select Country"
+          placeholder={t("Select Country")}
         />
       )}
     </FilterDropdownQuery>

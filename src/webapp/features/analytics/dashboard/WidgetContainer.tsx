@@ -4,6 +4,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { IconGripVertical, IconMinus, IconPlus, IconX } from "@tabler/icons-react";
 import { ReactNode } from "react";
 import { SingleWidgetConfig } from "../../../atoms/widgets-atoms";
+import { useT } from "@i18n/index";
 
 type Props = {
   children: ReactNode;
@@ -22,6 +23,7 @@ export const WidgetContainer = ({
   onToggleMinimize,
   onRemove,
 }: Props) => {
+  const t = useT();
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: widgetConfig.id,
     animateLayoutChanges: () => false,
@@ -39,7 +41,7 @@ export const WidgetContainer = ({
       className={`relative rounded-lg border border-border ${className} ${widgetConfig.isMinimized ? "py-2" : ""}`}
     >
       {widgetConfig.isMinimized && (
-        <span className="absolute -top-3 left-3 bg-background font-medium px-1">{widgetName}</span>
+        <span className="absolute -top-3 left-3 bg-background font-medium px-1">{t(widgetName)}</span>
       )}
 
       <div className="absolute -top-3 right-3 bg-background px-1 flex gap-1">

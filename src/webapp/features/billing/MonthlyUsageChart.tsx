@@ -1,6 +1,7 @@
 import { Chart } from "@components/Chart";
 import { useChartColors } from "@features/theme";
 import { ChartConfigurationCustomTypesPerDataset } from "chart.js";
+import { useT } from "@i18n/index";
 
 type Props = {
   dates: string[];
@@ -10,6 +11,7 @@ type Props = {
 };
 
 export function MonthlyUsageChart(props: Props) {
+  const t = useT();
   const colors = useChartColors();
 
   const config: ChartConfigurationCustomTypesPerDataset = {
@@ -18,14 +20,14 @@ export function MonthlyUsageChart(props: Props) {
       datasets: [
         {
           type: "bar",
-          label: "Daily Users",
+          label: t("Daily Users"),
           data: props.events,
           backgroundColor: colors.primary,
           hoverBackgroundColor: colors.primary,
         },
         {
           type: "line",
-          label: "Limit",
+          label: t("Limit"),
           data: props.events.map(() => props.quota),
           borderColor: props.state === "OK" ? colors.success : colors.destructive,
           borderWidth: 2,

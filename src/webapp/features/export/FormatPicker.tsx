@@ -1,4 +1,5 @@
 import { ToggleGroup, ToggleGroupList, ToggleGroupTrigger } from "@components/ToggleGroup";
+import { useT } from "@i18n/index";
 
 type Props = {
   value: string;
@@ -6,9 +7,10 @@ type Props = {
 };
 
 export function FormatPicker(props: Props) {
+  const t = useT();
   return (
     <div className="flex flex-col text-xs max-w-md">
-      <p className="font-medium mb-1">Export Format</p>
+      <p className="font-medium mb-1">{t("Export Format")}</p>
       <ToggleGroup defaultValue="csv" onValueChange={props.onChange}>
         <ToggleGroupList>
           <ToggleGroupTrigger value="csv" className="text-xs">
@@ -21,14 +23,12 @@ export function FormatPicker(props: Props) {
       </ToggleGroup>
       {props.value === "csv" && (
         <span className="text-muted-foreground p-1">
-          CSV format has better compatibility with most tools, but results in larger files and may be limited depending
-          on how much data you have.
+          {t("CSV format has better compatibility with most tools, but results in larger files and may be limited depending on how much data you have.")}
         </span>
       )}
       {props.value === "parquet" && (
         <span className="text-muted-foreground p-1">
-          Parquet has much better compression and is more efficient for large datasets, but may need to be converted to
-          other format before using it with some tools.
+          {t("Parquet has much better compression and is more efficient for large datasets, but may need to be converted to other format before using it with some tools.")}
         </span>
       )}
     </div>

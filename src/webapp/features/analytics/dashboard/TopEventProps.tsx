@@ -7,6 +7,7 @@ import { dateFilterValuesAtom } from "../../../atoms/date-atoms";
 import { topEventProps } from "../query";
 import { TopNChart } from "./TopNChart";
 import { TopNTitle } from "./TopNTitle";
+import { useT } from "@i18n/index";
 
 type Props = {
   appId: string;
@@ -15,6 +16,7 @@ type Props = {
 type AggregateValueName = "events" | "sum" | "median" | "min" | "max";
 
 export function TopEventProps(props: Props) {
+  const t = useT();
   const { buildMode } = useApps();
   const [searchParams] = useSearchParams();
   const { startDateIso, endDateIso, granularity } = useAtomValue(dateFilterValuesAtom);
@@ -125,7 +127,7 @@ export function TopEventProps(props: Props) {
       keyLabel={<StringKeySelector stringKeys={stringKeys} onChangeIndex={setStringKeyIndex} />}
       valueLabel={
         numericKeys.length === 0 ? (
-          "Events"
+          t("Events")
         ) : (
           <NumericKeySelector numericKeys={numericKeys} onChange={setSelectedNumericKey} />
         )
@@ -163,6 +165,7 @@ function NumericKeySelector(props: {
   numericKeys: string[];
   onChange: (value: [AggregateValueName, string | undefined]) => void;
 }) {
+  const t = useT();
   const onChangeValue = (e: React.ChangeEvent<HTMLSelectElement>) => {
     if (e.currentTarget.value === "") {
       props.onChange(["events", undefined]);
@@ -174,14 +177,14 @@ function NumericKeySelector(props: {
 
   return (
     <select className="form-select compact min-w-[6rem]" onChange={onChangeValue}>
-      <option value={[]}>Events</option>
+      <option value={[]}>{t("Events")}</option>
       {props.numericKeys.map((key) => (
         <Fragment key={key}>
           <option disabled>---</option>
-          <option value={["median", key]}>Median ({key})</option>
-          <option value={["min", key]}>Min ({key})</option>
-          <option value={["max", key]}>Max ({key})</option>
-          <option value={["sum", key]}>Sum ({key})</option>
+          <option value={["median", key]}>{t("Median ({key})", { key })}</option>
+          <option value={["min", key]}>{t("Min ({key})", { key })}</option>
+          <option value={["max", key]}>{t("Max ({key})", { key })}</option>
+          <option value={["sum", key]}>{t("Sum ({key})", { key })}</option>
         </Fragment>
       ))}
     </select>

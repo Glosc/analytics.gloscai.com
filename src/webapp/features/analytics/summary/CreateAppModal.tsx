@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@components/Button";
 import { IconX } from "@tabler/icons-react";
 import { TextInput } from "@components/TextInput";
+import { useT } from "@i18n/index";
 
 type Props = {
   open: boolean;
@@ -12,6 +13,7 @@ type Props = {
 };
 
 export function CreateAppModal(props: Props) {
+  const t = useT();
   const { createApp } = useApps();
   const navigate = useNavigate();
   const [name, setName] = useState("");
@@ -70,26 +72,26 @@ export function CreateAppModal(props: Props) {
                   </button>
                 </div>
                 <Dialog.Title as="h3" className="text-lg font-medium">
-                  Register a new app
+                  {t("Register a new app")}
                 </Dialog.Title>
                 <form onSubmit={handleSubmit} className="mt-2">
                   <TextInput
                     name="name"
-                    placeholder="App Name"
+                    placeholder={t("App Name")}
                     autoComplete="off"
                     required={true}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
                   <p className="text-sm text-muted-foreground mt-1">
-                    A friendly name to identify your app. You can change it later.
+                    {t("A friendly name to identify your app. You can change it later.")}
                   </p>
                   <Button
                     className="mt-4"
                     disabled={name.length < 2 || name.length > 40 || processing}
                     loading={processing}
                   >
-                    Confirm
+                    {t("Confirm")}
                   </Button>
                 </form>
               </Dialog.Panel>

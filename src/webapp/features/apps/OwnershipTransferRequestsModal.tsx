@@ -9,6 +9,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Fragment } from "react";
 import { toast } from "sonner";
 import { AppRequestPurpose, IncomingAppRequest } from "./app-requests";
+import { useT } from "@i18n/index";
 
 type Props = {
   open: boolean;
@@ -16,6 +17,7 @@ type Props = {
 };
 
 export function OwnershipTransferRequestsModal(props: Props) {
+  const t = useT();
   const {
     isLoading,
     isError,
@@ -31,11 +33,11 @@ export function OwnershipTransferRequestsModal(props: Props) {
     mutationFn: (appId: string) =>
       api.post(`/_apps/${appId}/requests/accept?purpose=${AppRequestPurpose.AppOwnership}`),
     onSuccess: () => {
-      toast.success("Ownership transfer accepted");
+      toast.success(t("Ownership transfer accepted"));
       refetch();
     },
     onError: () => {
-      toast.error("Failed to accept ownership transfer");
+      toast.error(t("Failed to accept ownership transfer"));
     },
   });
 
@@ -43,11 +45,11 @@ export function OwnershipTransferRequestsModal(props: Props) {
     mutationFn: (appId: string) =>
       api.post(`/_apps/${appId}/requests/reject?purpose=${AppRequestPurpose.AppOwnership}`),
     onSuccess: () => {
-      toast.success("Ownership transfer rejected");
+      toast.success(t("Ownership transfer rejected"));
       refetch();
     },
     onError: () => {
-      toast.error("Failed to reject ownership transfer");
+      toast.error(t("Failed to reject ownership transfer"));
     },
   });
 
@@ -97,7 +99,7 @@ export function OwnershipTransferRequestsModal(props: Props) {
                 <div className="flex items-center space-x-2 mb-6">
                   <IconCrown className="h-5 w-5 text-warning" />
                   <DialogTitle as="h3" className="text-lg font-medium">
-                    Pending Ownership Transfers
+                    {t("Pending Ownership Transfers")}
                   </DialogTitle>
                 </div>
 
@@ -112,11 +114,10 @@ export function OwnershipTransferRequestsModal(props: Props) {
                           <div className="flex-1">
                             <h4 className="font-semibold">{request.appName}</h4>
                             <p className="text-sm mt-1">
-                              <span className="font-medium">{request.requesterEmail}</span> wants to transfer ownership
-                              to you
+                              {t("{email} wants to transfer ownership to you", { email: request.requesterEmail })}
                             </p>
                             <p className="text-xs text-foreground/80 mt-1">
-                              Requested {formatDate(request.requestedAt)}
+                              {t("Requested {date}", { date: formatDate(request.requestedAt) })}
                             </p>
                           </div>
 
@@ -129,7 +130,7 @@ export function OwnershipTransferRequestsModal(props: Props) {
                               loading={acceptMutation.isPending}
                             >
                               <IconCheck className="h-4 w-4 mr-1" />
-                              Accept
+                              {t("Accept")}
                             </Button>
                             <Button
                               size="sm"
@@ -139,16 +140,15 @@ export function OwnershipTransferRequestsModal(props: Props) {
                               loading={rejectMutation.isPending}
                             >
                               <IconX className="h-4 w-4 mr-1" />
-                              Reject
+                              {t("Reject")}
                             </Button>
                           </div>
                         </div>
 
                         <div className="mt-3 p-3 bg-background/50 rounded border">
                           <p className="text-xs text-muted-foreground">
-                            <span className="font-semibold">By accepting:</span> You will become the owner and be
-                            responsible for billing. The current owner will be added to the sharing list with read-only
-                            access.
+                            <span className="font-semibold">{t("By accepting:")}</span>{" "}
+                            {t("You will become the owner and be responsible for billing. The current owner will be added to the sharing list with read-only access.")}
                           </p>
                         </div>
                       </div>

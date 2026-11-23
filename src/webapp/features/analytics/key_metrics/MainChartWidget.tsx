@@ -2,6 +2,7 @@ import { trackEvent } from "@aptabase/web";
 import { useApps } from "@features/apps";
 import { formatPeriod } from "@fns/format-date";
 import { formatNumber } from "@fns/format-number";
+import { getLocale, useT } from "@i18n/index";
 import { useQuery } from "@tanstack/react-query";
 import { useAtomValue } from "jotai";
 import { useEffect, useState } from "react";
@@ -24,13 +25,21 @@ function TooltipContent(props: {
     value: number;
   }>;
 }) {
+  const t = useT();
+
+  const seriesName = (name: string, value: number) => {
+    const translated = t(name);
+    if (getLocale() === "zh") return translated;
+    return value === 1 ? translated.toLowerCase().slice(0, -1) : translated.toLowerCase();
+  };
+
   return (
     <div className="text-sm whitespace-nowrap">
       <p className="text-center text-muted-foreground">{formatPeriod(props.granularity, props.label)}</p>
       {props.points.map((point) => (
         <p key={point.name}>
           <span className="font-medium">{formatNumber(point.value)}</span>{" "}
-          {point.value === 1 ? point.name.toLowerCase().slice(0, -1) : point.name.toLowerCase()}
+          {seriesName(point.name, point.value)}
         </p>
       ))}
     </div>

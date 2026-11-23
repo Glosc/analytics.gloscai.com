@@ -1,6 +1,8 @@
 import { Button } from "@components/Button";
+import { useT } from "@i18n/index";
 
 export function SignInWithGitHub() {
+  const t = useT();
   const url = `/api/_auth/github`;
 
   return (
@@ -13,7 +15,7 @@ export function SignInWithGitHub() {
             clipRule="evenodd"
           />
         </svg>
-        <span>Continue with GitHub</span>
+        <span>{t("Continue with GitHub")}</span>
       </a>
     </Button>
   );

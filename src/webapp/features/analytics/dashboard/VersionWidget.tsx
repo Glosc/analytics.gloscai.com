@@ -1,12 +1,15 @@
 import { TopNDataContainer } from "./TopNDataContainer";
 import { topAppVersions } from "../query";
 import { TopNChart } from "./TopNChart";
+import { useT } from "@i18n/index";
 
 type Props = {
   appId: string;
 };
 
 export function VersionWidget(props: Props) {
+  const t = useT();
+
   return (
     <TopNDataContainer appId={props.appId} queryName="top-appversions" query={topAppVersions}>
       {(data) => (
@@ -14,10 +17,10 @@ export function VersionWidget(props: Props) {
           {...data}
           id="appversions"
           key="appversions"
-          title="App Versions"
+          title={t("App Versions")}
           searchParamKey="appVersion"
           defaultFormat="percentage"
-          valueLabel="Sessions"
+          valueLabel={t("Sessions")}
         />
       )}
     </TopNDataContainer>

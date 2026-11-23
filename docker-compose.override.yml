@@ -1,0 +1,7 @@
+# Local dev override: port 5432 is taken by another project on this machine,
+# so Aptabase's postgres is exposed on 5433 instead.
+# Remember to use Port=5433 in DATABASE_URL (src/Properties/launchSettings.json).
+services:
+  pgdev:
+    ports: !override
+      - "5433:5432"

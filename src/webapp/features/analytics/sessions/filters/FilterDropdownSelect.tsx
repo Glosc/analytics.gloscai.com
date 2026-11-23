@@ -1,6 +1,7 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/Select";
 import { TopNQueryChildrenProps } from "@features/analytics/query";
 import { useMemo } from "react";
+import { useT } from "@i18n/index";
 
 type Props = {
   value: string | undefined;
@@ -10,6 +11,7 @@ type Props = {
 };
 
 export function FilterDropdownSelect(props: Props) {
+  const t = useT();
   if (!props.data.items?.length) {
     return null;
   }
@@ -31,7 +33,7 @@ export function FilterDropdownSelect(props: Props) {
       <SelectContent className="max-h-[410px] overflow-y-auto">
         {options.map((option) => (
           <SelectItem key={option.value} value={option.name}>
-            {option.name || "Unknown"}
+            {option.name || t("Unknown")}
           </SelectItem>
         ))}
       </SelectContent>

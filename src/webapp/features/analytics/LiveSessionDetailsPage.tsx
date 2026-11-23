@@ -12,9 +12,11 @@ import { useEffect } from "react";
 import { Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
 import { OSIcon } from "./dashboard/icons/os";
 import { SessionTimeline } from "./liveview/timeline";
+import { useT } from "@i18n/index";
 
 Component.displayName = "LiveSessionDetailsPage";
 export function Component() {
+  const t = useT();
   const { buildMode } = useApps();
   const app = useCurrentApp();
   const { sessionId } = useParams();
@@ -44,11 +46,11 @@ export function Component() {
   };
 
   return (
-    <Page title="Live View">
+    <Page title={t("Live View")}>
       <div className="flex flex-row justify-between items-center">
-        <PageHeading title="Session Timeline" subtitle={sessionId} />
+        <PageHeading title={t("Session Timeline")} subtitle={sessionId} />
         <Button className="mb-5" variant="ghost" onClick={handleBack}>
-          <IconArrowLeft /> Back
+          <IconArrowLeft /> {t("Back")}
         </Button>
       </div>
 
@@ -56,7 +58,7 @@ export function Component() {
         <div className="mt-10 flex flex-col">
           <div className="flex gap-2 items-center mb-1">
             <IconDevices className="text-muted-foreground h-5 w-5" />
-            <span className="tabular-nums">App Version {data.appVersion}</span>
+            <span className="tabular-nums">{t("App Version {version}", { version: data.appVersion })}</span>
           </div>
           <div className="flex gap-2 items-center mb-1">
             <IconUser className="text-muted-foreground h-5 w-5" />
@@ -72,7 +74,7 @@ export function Component() {
 
               <div className="flex gap-2 items-center">
                 <IconClick className="text-muted-foreground h-5 w-5" />
-                <span>{data.eventsCount} events</span>
+                <span>{t("{count} events", { count: data.eventsCount })}</span>
               </div>
             </div>
 

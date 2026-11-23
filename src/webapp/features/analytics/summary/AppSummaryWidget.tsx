@@ -8,6 +8,7 @@ import { DailyUsersChart } from "./DailyUsersChart";
 import { EmptyStateWidget } from "./EmptyStateWidget";
 import { SummaryDataContainer } from "./SummaryDataContainer";
 import { WaitingForEventsInfo } from "./WaitingForEventsInfo";
+import { useT } from "@i18n/index";
 
 type Props = {
   app: Application;
@@ -15,6 +16,7 @@ type Props = {
 };
 
 export function AppSummaryWidget(props: Props) {
+  const t = useT();
   const period = useAtomValue(periodAtom);
   const { startDateIso, endDateIso, granularity } = useAtomValue(dateFilterValuesAtom);
 
@@ -61,13 +63,13 @@ export function AppSummaryWidget(props: Props) {
                     <GrowthIndicator
                       current={metrics.current.dailyUsers}
                       previous={metrics.previous?.dailyUsers}
-                      previousFormatted={`${metrics.previous?.dailyUsers.toFixed(0)} daily users`}
+                      previousFormatted={`${metrics.previous?.dailyUsers.toFixed(0)} ${t("daily users")}`}
                     />
                     <span className="text-2xl">{metrics?.current.dailyUsers.toFixed(0)}</span>
                   </div>
                 ) : null}
               </div>
-              <div>{metrics ? <p className="text-sm text-muted-foreground text-right">daily users</p> : null}</div>
+              <div>{metrics ? <p className="text-sm text-muted-foreground text-right">{t("daily users")}</p> : null}</div>
             </div>
             <div className="h-16">
               <DailyUsersChart values={dailyUsers ?? []} />

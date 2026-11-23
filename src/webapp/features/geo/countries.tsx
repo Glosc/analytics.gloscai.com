@@ -1,7 +1,26 @@
+import { getLocale } from "@i18n/index";
+
 const fallbackImageUrl = new URL(`./default-country.svg`, import.meta.url).href;
 
+const displayNamesByLocale = new Map<string, Intl.DisplayNames>();
+
 export const getCountryName = (countryCode: string) => {
-  return countryCodesToName?.[countryCode] || countryCode;
+  if (!countryCode) return "";
+
+  const locale = getLocale() === "zh" ? "zh-CN" : "en";
+
+  try {
+    let displayNames = displayNamesByLocale.get(locale);
+    if (!displayNames) {
+      displayNames = new Intl.DisplayNames([locale], { type: "region" });
+      displayNamesByLocale.set(locale, displayNames);
+    }
+
+    return displayNames.of(countryCode) ?? countryCodesToName[countryCode] ?? countryCode;
+  } catch {
+    // Intl.DisplayNames may be unavailable in older browsers
+    return countryCodesToName[countryCode] || countryCode;
+  }
 };
 
 export const getCountryFlagUrl = (countryCode: string) => {

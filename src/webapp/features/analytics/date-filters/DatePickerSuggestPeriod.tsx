@@ -6,6 +6,7 @@ import { useTheme } from "@features/theme";
 import { TooltipContent, TooltipProvider, TooltipTrigger } from "@radix-ui/react-tooltip";
 import { IconX } from "@tabler/icons-react";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useI18n } from "@i18n/index";
 import { useEffect, useMemo, useState } from "react";
 import {
   clearEndDatePersistentAtom,
@@ -30,6 +31,30 @@ const startOptionsSuggestions = [
 
 const endOptionsSuggestions = ["Now"];
 
+// The parser only understands English date phrases, so we keep those as input
+// and localize just what is displayed in the dropdown.
+const suggestionLabels: Array<[string, string]> = [
+  ["today", "今天"],
+  ["yesterday", "昨天"],
+  ["2 days ago", "2 天前"],
+  ["last week", "上周"],
+  ["last month", "上个月"],
+  ["2 months ago", "2 个月前"],
+  ["this year", "今年"],
+  ["last year", "去年"],
+  ["now", "现在"],
+];
+
+function localizeSuggestionLabel(label: string, locale: "en" | "zh"): string {
+  if (locale !== "zh") return label;
+
+  const lower = label.toLowerCase();
+  const match = suggestionLabels.find(([english]) => lower.startsWith(english));
+  if (!match) return label;
+
+  return match[1] + label.slice(match[0].length);
+}
+
 type UnappliedDate = {
   end?: DateSuggestion | null;
   start?: DateSuggestion | null;
@@ -38,6 +63,7 @@ type UnappliedDate = {
 };
 
 export function DatePickerSuggestPeriod() {
+  const { t, locale } = useI18n();
   const [startDate, setStartDate] = useAtom(startDateAtom);
   const startDatePersistentLabel = useAtomValue(startDatePersistentLabelAtom);
   const [endDate, setEndDate] = useAtom(endDateAtom);
@@ -55,6 +81,12 @@ export function DatePickerSuggestPeriod() {
   };
 
   const panelColors = usePanelColors();
+
+  const renderSuggestion = (option: { date: Date; label: string }) => (
+    <span className="truncate group-data-[selected]:font-semibold">
+      {localizeSuggestionLabel(option.label, locale)}
+    </span>
+  );
 
   const applyEndDate = (newEndDate: DateSuggestion | null) => {
     if (!newEndDate) {
@@ -106,6 +138,8 @@ export function DatePickerSuggestPeriod() {
             }}
             initialSuggestion={startDatePersistentLabel}
             optionsSuggestions={startOptionsSuggestions}
+            suggestionRenderer={renderSuggestion}
+            displayValue={(option) => localizeSuggestionLabel(option.label, locale)}
             isError={unappliedDate.startError}
           />
         </div>
@@ -118,6 +152,8 @@ export function DatePickerSuggestPeriod() {
             }}
             initialSuggestion={endDatePersistentLabel}
             optionsSuggestions={endOptionsSuggestions}
+            suggestionRenderer={renderSuggestion}
+            displayValue={(option) => localizeSuggestionLabel(option.label, locale)}
             isError={unappliedDate.endError}
           />
         </div>
@@ -131,7 +167,7 @@ export function DatePickerSuggestPeriod() {
             </TooltipTrigger>
             <TooltipContent side="bottom" align="center" className="pt-2">
               <div className="bg-popover text-popover-foreground rounded-md border border-border shadow-md p-2">
-                <span className="text-sm">Back to period selection</span>
+                <span className="text-sm">{t("Back to period selection")}</span>
               </div>
             </TooltipContent>
           </Tooltip>

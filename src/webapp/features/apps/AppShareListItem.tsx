@@ -4,6 +4,7 @@ import { api } from "@fns/api";
 import { IconShareOff } from "@tabler/icons-react";
 import { Button } from "@components/Button";
 import { formatDate } from "@fns/format-date";
+import { useT } from "@i18n/index";
 
 type Props = {
   app: Application;
@@ -13,6 +14,7 @@ type Props = {
 };
 
 export function AppShareListItem(props: Props) {
+  const t = useT();
   const unshare = async (e: React.SyntheticEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
@@ -33,7 +35,7 @@ export function AppShareListItem(props: Props) {
               <IconShareOff className="w-4 h-4" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Unshare</TooltipContent>
+          <TooltipContent>{t("Unshare")}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
     </li>

@@ -1,3 +1,4 @@
+import { Badge } from "@components/Badge";
 import { PingSignal } from "@components/PingSignal";
 import { useBillingState } from "@features/billing";
 import { isBillingEnabled } from "@features/env";
@@ -8,6 +9,8 @@ import React, { Fragment } from "react";
 import { Link } from "react-router-dom";
 import { twMerge } from "tailwind-merge";
 import { signOut, UserAccount, UserAvatar } from "../auth";
+import { useT } from "@i18n/index";
+import { LanguageSwitch } from "@components/LanguageSwitch";
 
 type Props = {
   user: UserAccount;
@@ -39,6 +42,7 @@ const MenuItem = (props: {
 );
 
 export function UserMenu(props: Props) {
+  const t = useT();
   const billing = useBillingState();
 
   return (
@@ -63,18 +67,29 @@ export function UserMenu(props: Props) {
       >
         <Menu.Items className="absolute right-0 lg:bottom-8 lg:right-auto z-10 mt-2 w-60 origin-top-right rounded-md py-1 shadow-lg border bg-background focus-ring">
           <div className="px-3 py-1 text-xs flex items-center justify-between">
-            <div>
-              <span className="text-muted-foreground">Signed in as</span>
-              <span className="block truncate text-sm font-medium">{props.user.email}</span>
+            <div className="min-w-0">
+              <span className="text-muted-foreground">{t("Signed in as")}</span>
+              <span className="flex items-center gap-1 text-sm font-medium">
+                <span className="truncate">{props.user.username || props.user.email}</span>
+                {props.user.role === "admin" && (
+                  <Badge variant="secondary" className="shrink-0 px-1.5 py-0 text-[10px]">
+                    Admin
+                  </Badge>
+                )}
+              </span>
             </div>
             <ThemeToggle />
+          </div>
+          <div className="px-3 py-1 text-xs flex items-center justify-between gap-2">
+            <span className="text-muted-foreground">{t("Language")}</span>
+            <LanguageSwitch />
           </div>
           {isBillingEnabled && (
             <>
               <Divider />
               <MenuItem href="/billing">
                 <IconCreditCard className="w-4 h-4" />
-                <span>Billing & Profile</span>
+                <span>{t("Billing & Profile")}</span>
                 {billing === "OVERUSE" && <PingSignal color="warning" size="sm" />}
               </MenuItem>
             </>
@@ -82,7 +97,7 @@ export function UserMenu(props: Props) {
           <Divider />
           <MenuItem href="#" onClick={signOut}>
             <IconDoorExit className="w-4 h-4" />
-            <span>Sign out</span>
+            <span>{t("Sign out")}</span>
           </MenuItem>
         </Menu.Items>
       </Transition>

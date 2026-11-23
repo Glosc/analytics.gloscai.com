@@ -1,7 +1,10 @@
 import { region } from "@features/env";
 import { RegionFlag } from "@components/RegionFlag";
+import { useT } from "@i18n/index";
 
 export function DataResidency() {
+  const t = useT();
+
   if (!region) return null;
 
   return (
@@ -9,7 +12,7 @@ export function DataResidency() {
       <div className="p-1">
         <RegionFlag />
       </div>
-      <p>{region.toUpperCase()} Data Residency</p>
+      <p>{t("{region} Data Residency", { region: region.toUpperCase() })}</p>
     </div>
   );
 }

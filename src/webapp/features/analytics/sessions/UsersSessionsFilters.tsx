@@ -6,6 +6,7 @@ import { AppVersionDropdown } from "./filters/AppVersionDropdown";
 import { CountryFilterDropdown } from "./filters/CountryFilterDropdown";
 import { EventNameFilterDropdown } from "./filters/EventNameFilterDropdown";
 import { OsFilterDropdown } from "./filters/OsFilterDropdown";
+import { useT } from "@i18n/index";
 
 type TopFilterValue = {
   eventName?: string;
@@ -22,6 +23,7 @@ type Props = {
 const isFiltersExpandedAtom = atomWithStorage("user_sessions_filters_expanded", true);
 
 export function UsersSessionsFilters({ appId, onFiltersChange }: Props) {
+  const t = useT();
   const [isFiltersExpanded, setIsFiltersExpanded] = useAtom(isFiltersExpandedAtom);
   const [topFilters, setTopFilters] = useState<TopFilterValue>({});
 
@@ -62,7 +64,7 @@ export function UsersSessionsFilters({ appId, onFiltersChange }: Props) {
           <IconChevronDown
             className={`h-3 w-3 transition-transform duration-200 ${isFiltersExpanded ? "rotate-0" : "-rotate-90"}`}
           />
-          {isFiltersExpanded ? "Hide Filters" : "Show Filters"}
+          {isFiltersExpanded ? t("Hide Filters") : t("Show Filters")}
         </button>
       </div>
     </div>

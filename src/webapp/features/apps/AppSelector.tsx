@@ -5,6 +5,7 @@ import { IconSelector } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import { AppIcon } from "./AppIcon";
 import { twJoin } from "tailwind-merge";
+import { useT } from "@i18n/index";
 
 type OptionProps = {
   value?: Application;
@@ -30,6 +31,7 @@ function StyledOption(props: OptionProps) {
 const Divider = () => <div className="border-t my-1" />;
 
 export function AppSelector() {
+  const t = useT();
   const { apps } = useApps();
   const currentApp = useCurrentApp();
   const navigate = useNavigate();
@@ -49,7 +51,7 @@ export function AppSelector() {
               {currentApp && <AppIcon className="w-5 h-5" iconPath={currentApp.iconPath} />}
               <div className="flex items-center justify-between truncate w-full">
                 <span className="block truncate">
-                  {currentApp?.name ?? <span className="text-muted-foreground text-sm">Select an App</span>}
+                  {currentApp?.name ?? <span className="text-muted-foreground text-sm">{t("Select an App")}</span>}
                 </span>
                 <div className="w-4 h-4 ml-1">
                   <IconSelector strokeWidth={2} className="h-4 w-4 text-muted-foreground" />

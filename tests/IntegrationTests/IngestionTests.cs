@@ -117,7 +117,7 @@ public class IngestionTests
     {
         // A dedicated owner, because locking the shared fixture users would affect other tests
         var owner = new AccountClient(_fixture.CreateClient());
-        await owner.CreateAccount("Locked Owner", $"locked.owner.{Guid.NewGuid()}@got.com");
+        await owner.CreateAccount("Locked Owner", $"locked.owner.{Guid.NewGuid():N}"[..30]);
         var app = await owner.CreateApp(Guid.NewGuid().ToString());
 
         var db = _fixture.GetService<IDbContext>();

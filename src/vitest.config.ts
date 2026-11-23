@@ -14,6 +14,7 @@ export default defineConfig({
       { find: "@fns", replacement: path.resolve(__dirname, "./webapp/fns") },
       { find: "@hooks", replacement: path.resolve(__dirname, "./webapp/hooks") },
       { find: "@features", replacement: path.resolve(__dirname, "./webapp/features") },
+      { find: "@i18n", replacement: path.resolve(__dirname, "./webapp/i18n") },
     ],
   },
 });

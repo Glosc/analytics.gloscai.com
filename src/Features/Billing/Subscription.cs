@@ -22,7 +22,7 @@ public class FreeSubscription
 
 public class SubscriptionPlan
 {
-    public const int FreeTrialMonthlyQuota = 1_000_000;
+    public const int FreeTrialMonthlyQuota = 200_000_000;
 
     public string Name { get; }
     public int MonthlyPrice { get; }

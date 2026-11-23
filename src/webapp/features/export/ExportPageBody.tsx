@@ -9,6 +9,7 @@ import { ToolsList } from "./ToolsList";
 import { DevelopmentNotice } from "./DevelopmentNotice";
 import { ToggleGroup, ToggleGroupList, ToggleGroupTrigger } from "@components/ToggleGroup";
 import { FormatPicker } from "./FormatPicker";
+import { formatMonthName } from "@fns/format-date";
 import { useState } from "react";
 
 type Props = {
@@ -22,28 +23,10 @@ type MonthlyUsage = {
   events: number;
 };
 
-function getMonthName(number: number) {
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-  return months[number - 1];
-}
-
 function groupByYear(usage: MonthlyUsage[]) {
   return usage.reduce((result, item) => {
     const existingYear = result.find((entry) => entry.year === item.year);
-    const monthName = getMonthName(item.month);
+    const monthName = formatMonthName(item.month);
 
     if (existingYear) {
       existingYear.months.push({ number: item.month, name: monthName, events: item.events });

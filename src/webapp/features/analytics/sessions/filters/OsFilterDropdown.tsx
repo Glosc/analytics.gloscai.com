@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { atomWithSearchParam } from "../../../../atoms/location-atoms";
 import { FilterDropdownQuery } from "./FilterDropdownQuery";
 import { FilterDropdownSelect } from "./FilterDropdownSelect";
+import { useT } from "@i18n/index";
 
 type Props = {
   appId: string;
@@ -13,6 +14,7 @@ type Props = {
 const osAtom = atomWithSearchParam("os");
 
 export function OsFilterDropdown(props: Props) {
+  const t = useT();
   const [selectedOs, setSelectedOs] = useAtom(osAtom);
 
   if (props.onValueChange) {
@@ -24,7 +26,7 @@ export function OsFilterDropdown(props: Props) {
   return (
     <FilterDropdownQuery appId={props.appId} queryKey={"sessions-os-dropdown"} query={topOperatingSystem}>
       {(data) => (
-        <FilterDropdownSelect value={selectedOs} onValueChange={setSelectedOs} data={data} placeholder="Select OS" />
+        <FilterDropdownSelect value={selectedOs} onValueChange={setSelectedOs} data={data} placeholder={t("Select OS")} />
       )}
     </FilterDropdownQuery>
   );

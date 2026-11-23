@@ -2,6 +2,7 @@ import { Button } from "@components/Button";
 import { IconCube } from "@tabler/icons-react";
 import { useRef, useState } from "react";
 import { AppIcon } from "./AppIcon";
+import { useI18n } from "@i18n/index";
 
 type ImageDetails = {
   src: string;
@@ -51,6 +52,7 @@ type Props = {
 };
 
 export function AppIconUpload(props: Props) {
+  const { t } = useI18n();
   const [imgSrc, setImgSrc] = useState<string>("");
   const [error, setError] = useState<string>("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -67,12 +69,12 @@ export function AppIconUpload(props: Props) {
     if (!file) return;
 
     if (file.size > 1024 * 50) {
-      setError("Icon size must be lower than 50KB.");
+      setError(t("Icon size must be lower than 50KB."));
       return;
     }
 
     if (file.type !== "image/png") {
-      setError("Icon must be a PNG file.");
+      setError(t("Icon must be a PNG file."));
       return;
     }
 
@@ -82,14 +84,15 @@ export function AppIconUpload(props: Props) {
       props.onIconChanged(details.contentAsBase64);
     } catch (err: any) {
       console.log(err);
-      setError(err instanceof Error ? err.message : err.toString());
+      const message = err instanceof Error ? err.message : err.toString();
+      setError(typeof err === "string" ? t(err) : message);
     }
   }
 
   return (
     <div>
       <label className="text-sm mb-2 block font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-        Icon
+        {t("Icon")}
       </label>
       <div className="flex gap-2 items-center">
         {imgSrc ? (
@@ -103,7 +106,7 @@ export function AppIconUpload(props: Props) {
         <input ref={inputRef} onChange={handleFileChanged} type="file" className="hidden" />
         <div>
           <Button variant="ghost" onClick={handleClick} type="button">
-            Change
+            {t("Change")}
           </Button>
         </div>
       </div>

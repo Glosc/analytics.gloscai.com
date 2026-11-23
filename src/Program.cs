@@ -90,6 +90,12 @@ public partial class Program
                             options.Cookie.MaxAge = TimeSpan.FromDays(365);
                         }).AddGitHub(appEnv).AddGoogle(appEnv);
 
+        // Integration tests register several accounts per run, so the sign-up limit can be raised
+        // through the environment instead of being hard-coded.
+        var signUpLimit = int.TryParse(Environment.GetEnvironmentVariable("SIGNUP_RATE_LIMIT"), out var parsedSignUpLimit) && parsedSignUpLimit > 0
+            ? parsedSignUpLimit
+            : 4;
+
         builder.Services.AddRateLimiter(c =>
         {
             c.RejectionStatusCode = 429;
@@ -109,8 +115,18 @@ public partial class Program
                 partition => new FixedWindowRateLimiterOptions
                 {
                     AutoReplenishment = true,
-                    PermitLimit = 4,
+                    PermitLimit = signUpLimit,
                     Window = TimeSpan.FromHours(1)
+                })
+            );
+
+            c.AddPolicy("SignIn", httpContext => RateLimitPartition.GetFixedWindowLimiter(
+                httpContext.ResolveClientIpAddress(),
+                partition => new FixedWindowRateLimiterOptions
+                {
+                    AutoReplenishment = true,
+                    PermitLimit = 10,
+                    Window = TimeSpan.FromMinutes(5)
                 })
             );
 
@@ -153,7 +169,6 @@ public partial class Program
         builder.Services.AddSingleton<IBillingQueries, BillingQueries>();
         builder.Services.AddSingleton<IPrivacyQueries, PrivacyQueries>();
         builder.Services.AddSingleton<IUserHasher, DailyUserHasher>();
-        builder.Services.AddSingleton<IAuthTokenManager, AuthTokenManager>();
         builder.Services.AddSingleton<IIngestionCache, IngestionCache>();
         builder.Services.AddSingleton<IRejectionStats, RejectionStats>();
         builder.Services.AddHostedService<RejectionStatsReporter>();

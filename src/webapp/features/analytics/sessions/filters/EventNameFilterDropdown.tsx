@@ -4,6 +4,7 @@ import { useEffect, useMemo } from "react";
 import { atomWithSearchParam } from "../../../../atoms/location-atoms";
 import { FilterDropdownFancy } from "./FilterDropdownFancy";
 import { FilterDropdownQuery } from "./FilterDropdownQuery";
+import { useT } from "@i18n/index";
 
 type Props = {
   appId: string;
@@ -17,6 +18,7 @@ type Props = {
 const eventNameAtom = atomWithSearchParam("eventName");
 
 export function EventNameFilterDropdown(props: Props) {
+  const t = useT();
   const localAtom = useMemo(
     () => (props.localPersistence ? atom<string | undefined>(props.localValue) : null),
     [props.localValue, props.localPersistence]
@@ -38,7 +40,7 @@ export function EventNameFilterDropdown(props: Props) {
           onValueChange={setSelectedEvent}
           onRemove={props.onRemove}
           data={data}
-          placeholder="Select Event"
+          placeholder={t("Select Event")}
           className={props.className}
         />
       )}

@@ -3,6 +3,7 @@ import { useApps } from "@features/apps";
 import { useQuery } from "@tanstack/react-query";
 import { useAtomValue } from "jotai";
 import { dateFilterValuesAtom } from "../../../atoms/date-atoms";
+import { useT } from "@i18n/index";
 
 // Matches the top-N shape ({ name, value }) returned by the backend,
 // where value is the number of occurrences within the date range.
@@ -39,6 +40,7 @@ type Props = {
 };
 
 export function ErrorTypeFilterDropdown(props: Props) {
+  const t = useT();
   const { buildMode } = useApps();
   const dateFilters = useAtomValue(dateFilterValuesAtom);
 
@@ -61,7 +63,7 @@ export function ErrorTypeFilterDropdown(props: Props) {
         <SelectValue />
       </SelectTrigger>
       <SelectContent className="max-h-[410px] overflow-y-auto">
-        <SelectItem value="all">All Types</SelectItem>
+        <SelectItem value="all">{t("All Types")}</SelectItem>
         {showSelectedFallback && <SelectItem value={props.value}>{props.value}</SelectItem>}
         {items.map((item) => (
           <SelectItem key={item.name} value={item.name}>
@@ -69,7 +71,7 @@ export function ErrorTypeFilterDropdown(props: Props) {
           </SelectItem>
         ))}
         {items.length === 0 && !showSelectedFallback && (
-          <div className="text-muted-foreground py-1.5 pl-8 pr-2 text-sm">No error types in range</div>
+          <div className="text-muted-foreground py-1.5 pl-8 pr-2 text-sm">{t("No error types in range")}</div>
         )}
       </SelectContent>
     </Select>

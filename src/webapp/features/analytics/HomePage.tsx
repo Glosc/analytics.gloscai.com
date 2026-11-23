@@ -19,9 +19,11 @@ import { BuildModeSelector } from "./mode/BuildModeSelector";
 import { DebugModeBanner } from "./mode/DebugModeBanner";
 import { AppSummaryWidget } from "./summary/AppSummaryWidget";
 import { NewAppWidget } from "./summary/NewAppWidget";
+import { useT } from "@i18n/index";
 
 Component.displayName = "HomePage";
 export function Component() {
+  const t = useT();
   const { apps, buildMode, refetchApps } = useApps();
   const { startDateIso, endDateIso } = useAtomValue(dateFilterValuesAtom);
   const [showTransferModal, setShowTransferModal] = useState(false);
@@ -47,7 +49,7 @@ export function Component() {
 
   if (apps.length === 0) {
     return (
-      <Page title="Welcome">
+      <Page title={t("Welcome")}>
         <LonelyState />
       </Page>
     );
@@ -61,9 +63,9 @@ export function Component() {
   const shouldShowSplit = sharedApps.length > 0;
 
   return (
-    <Page title="Home">
+    <Page title={t("Home")}>
       <div className="flex justify-between items-center">
-        <PageHeading title="Home" />
+        <PageHeading title={t("Home")} />
         <div className="flex items-end space-x-2">
           <BuildModeSelector />
           <DateFilterContainer />
@@ -78,11 +80,15 @@ export function Component() {
             <IconCrown className="h-4 w-4 text-warning" />
             <div className="flex items-center justify-between">
               <AlertDescription>
-                You have {transferRequests.length} pending ownership transfer{transferRequests.length > 1 ? "s" : ""}{" "}
-                waiting for your review.
+                {t(
+                  transferRequests.length === 1
+                    ? "You have {count} pending ownership transfer waiting for your review."
+                    : "You have {count} pending ownership transfers waiting for your review.",
+                  { count: transferRequests.length }
+                )}
               </AlertDescription>
               <Button size="sm" variant="default" onClick={() => setShowTransferModal(true)} className="ml-4">
-                Review Requests
+                {t("Review Requests")}
               </Button>
             </div>
           </Alert>
@@ -94,10 +100,10 @@ export function Component() {
           {/* Owned Apps Section - Always visible when there's a split */}
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              <h2 className="text-lg font-semibold">Owned by me</h2>
+              <h2 className="text-lg font-semibold">{t("Owned by me")}</h2>
               <TooltipProvider delayDuration={0}>
                 <Tooltip>
-                  <TooltipContent>The billing plan only applies to apps owned by you</TooltipContent>
+                  <TooltipContent>{t("The billing plan only applies to apps owned by you")}</TooltipContent>
                   <TooltipTrigger>
                     <IconInfoCircle className="h-4 w-4 text-muted-foreground" />
                   </TooltipTrigger>
@@ -119,7 +125,7 @@ export function Component() {
           {/* Shared Apps Section */}
           {sharedApps.length > 0 && (
             <div>
-              <h2 className="text-lg font-semibold mb-4">Shared with me</h2>
+              <h2 className="text-lg font-semibold mb-4">{t("Shared with me")}</h2>
               <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {sharedApps.map((app) => (
                   <LazyLoad className="h-36" key={app.id}>

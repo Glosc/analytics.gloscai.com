@@ -4,12 +4,14 @@ import { topOSVersions, topOperatingSystem } from "../query";
 import { OS } from "./OS";
 import { TopNChart } from "./TopNChart";
 import { TopNTitle } from "./TopNTitle";
+import { useT } from "@i18n/index";
 
 type Props = {
   appId: string;
 };
 
 export function OSWidget(props: Props) {
+  const t = useT();
   const [searchParams] = useSearchParams();
   const osName = searchParams.get("osName") || "";
 
@@ -27,7 +29,7 @@ export function OSWidget(props: Props) {
               </TopNTitle>
             }
             defaultFormat="percentage"
-            valueLabel="Sessions"
+            valueLabel={t("Sessions")}
           />
         )}
       </TopNDataContainer>
@@ -40,10 +42,10 @@ export function OSWidget(props: Props) {
         <TopNChart
           {...data}
           id="osnames"
-          title="Operating Systems"
+          title={t("Operating Systems")}
           searchParamKey="osName"
           defaultFormat="percentage"
-          valueLabel="Sessions"
+          valueLabel={t("Sessions")}
           renderRow={(item) => <OS name={item.name} />}
         />
       )}

@@ -4,12 +4,14 @@ import { topCountries, topRegions } from "../query";
 import { Country } from "./Country";
 import { TopNChart } from "./TopNChart";
 import { TopNTitle } from "./TopNTitle";
+import { useT } from "@i18n/index";
 
 type Props = {
   appId: string;
 };
 
 export function CountryWidget(props: Props) {
+  const t = useT();
   const [searchParams] = useSearchParams();
   const countryCode = searchParams.get("countryCode") || "";
 
@@ -27,7 +29,7 @@ export function CountryWidget(props: Props) {
               </TopNTitle>
             }
             defaultFormat="percentage"
-            valueLabel="Sessions"
+            valueLabel={t("Sessions")}
           />
         )}
       </TopNDataContainer>
@@ -41,10 +43,10 @@ export function CountryWidget(props: Props) {
           {...data}
           id="countries"
           key="countries"
-          title="Countries"
+          title={t("Countries")}
           searchParamKey="countryCode"
           defaultFormat="percentage"
-          valueLabel="Sessions"
+          valueLabel={t("Sessions")}
           renderRow={(item) => <Country countryCode={item.name} />}
         />
       )}

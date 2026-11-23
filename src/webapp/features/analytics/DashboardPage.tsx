@@ -32,6 +32,7 @@ import { MainChartWidget } from "./key_metrics/MainChartWidget";
 import { AppLockedContent } from "./locked/AppLockedContent";
 import { BuildModeSelector } from "./mode/BuildModeSelector";
 import { DebugModeBanner } from "./mode/DebugModeBanner";
+import { useT } from "@i18n/index";
 Component.displayName = "DashboardPage";
 
 export function Component() {
@@ -54,6 +55,7 @@ export function Component() {
 }
 
 function AppDashboard({ app }: { app: Application }) {
+  const t = useT();
   const { buildMode } = useApps();
   const navigate = useNavigate();
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
@@ -111,7 +113,7 @@ function AppDashboard({ app }: { app: Application }) {
           <WidgetContainer
             key={widgetId}
             widgetConfig={widget}
-            widgetName={widget?.title ?? "Custom Chart"}
+            widgetName={widget?.title ?? t("Custom Chart")}
             className="md:col-span-2"
             onToggleMinimize={() => toggleMinimize(widgetId)}
             onRemove={() => removeWidget(widgetId)}
@@ -124,7 +126,7 @@ function AppDashboard({ app }: { app: Application }) {
           <WidgetContainer
             key={widgetId}
             widgetConfig={widget}
-            widgetName={widget?.title ?? "Events Chart"}
+            widgetName={widget?.title ?? t("Events Chart")}
             className="md:col-span-2"
             onToggleMinimize={() => toggleMinimize(widgetId)}
           >
@@ -136,7 +138,7 @@ function AppDashboard({ app }: { app: Application }) {
           <LazyLoad key={widgetId}>
             <WidgetContainer
               widgetConfig={widget}
-              widgetName={widget?.title ?? "Countries"}
+              widgetName={widget?.title ?? t("Countries")}
               onToggleMinimize={() => toggleMinimize(widgetId)}
               className="h-full"
             >
@@ -149,7 +151,7 @@ function AppDashboard({ app }: { app: Application }) {
           <LazyLoad key={widgetId}>
             <WidgetContainer
               widgetConfig={widget}
-              widgetName={widget?.title ?? "Operating Systems"}
+              widgetName={widget?.title ?? t("Operating Systems")}
               onToggleMinimize={() => toggleMinimize(widgetId)}
               className="h-full"
             >
@@ -162,7 +164,7 @@ function AppDashboard({ app }: { app: Application }) {
           <LazyLoad key={widgetId}>
             <WidgetContainer
               widgetConfig={widget}
-              widgetName={widget?.title ?? "Events"}
+              widgetName={widget?.title ?? t("Events")}
               onToggleMinimize={() => toggleMinimize(widgetId)}
               className="h-full"
             >
@@ -175,7 +177,7 @@ function AppDashboard({ app }: { app: Application }) {
           <LazyLoad key={widgetId}>
             <WidgetContainer
               widgetConfig={widget}
-              widgetName={widget?.title ?? "App Versions"}
+              widgetName={widget?.title ?? t("App Versions")}
               onToggleMinimize={() => toggleMinimize(widgetId)}
               className="h-full"
             >
@@ -211,7 +213,7 @@ function AppDashboard({ app }: { app: Application }) {
       {buildMode === "debug" && <DebugModeBanner />}
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <PageHeading title="Dashboard" aside={aside()} onClick={resetFilters} />
+          <PageHeading title={t("Dashboard")} aside={aside()} onClick={resetFilters} />
           <div className="flex items-end space-x-2">
             <BuildModeSelector />
             <DateFilterContainer />
