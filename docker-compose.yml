@@ -1,42 +1,75 @@
-version: "3"
-services:
-  pgdev:
-    container_name: aptabase_pgdev
-    restart: always
-    image: postgres:15
-    volumes:
-      - pgdev-data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_USER: aptabase
-      POSTGRES_PASSWORD: aptabase_pw
+name: aptabase-production
 
-  clickhousedev:
-    container_name: aptabase_clickhousedev
-    image: clickhouse/clickhouse-server:26.8.36.3
-    restart: always
+services:
+  aptabase:
+    image: ghcr.io/glosc/analytics.gloscai.com:${APTABASE_IMAGE_TAG:-latest}
+    restart: unless-stopped
     ports:
-      - "8123:8123"
-    volumes:
-      - clickhousedev-data:/var/lib/clickhouse
+      - "127.0.0.1:${APTABASE_PORT:-8080}:8080"
     environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      DOTNET_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: "8080"
+      REGION: SH
+      HOME: /home/app
+      BASE_URL: ${BASE_URL:?Set BASE_URL to the public HTTPS URL}
+      AUTH_SECRET: ${AUTH_SECRET:?Generate an AUTH_SECRET for production}
+      DATABASE_URL: "Host=postgres;Port=5432;Username=aptabase;Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD};Database=aptabase"
+      CLICKHOUSE_URL: "Host=clickhouse;Port=8123;Username=aptabase;Password=${CLICKHOUSE_PASSWORD:?Set CLICKHOUSE_PASSWORD};Database=aptabase"
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_FROM_ADDRESS: ${SMTP_FROM_ADDRESS:-}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      OAUTH_GITHUB_CLIENT_ID: ${OAUTH_GITHUB_CLIENT_ID:-}
+      OAUTH_GITHUB_CLIENT_SECRET: ${OAUTH_GITHUB_CLIENT_SECRET:-}
+      OAUTH_GOOGLE_CLIENT_ID: ${OAUTH_GOOGLE_CLIENT_ID:-}
+      OAUTH_GOOGLE_CLIENT_SECRET: ${OAUTH_GOOGLE_CLIENT_SECRET:-}
+    volumes:
+      - aptabase-keys:/home/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: aptabase
+      POSTGRES_USER: aptabase
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", 'pg_isready -h 127.0.0.1 -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:26.8.36.3
+    restart: unless-stopped
+    environment:
+      CLICKHOUSE_DB: aptabase
       CLICKHOUSE_USER: aptabase
-      CLICKHOUSE_PASSWORD: aptabase_pw
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:?Set CLICKHOUSE_PASSWORD}
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
     ulimits:
       nofile:
         soft: 262144
         hard: 262144
-
-  mailcatcher:
-    container_name: aptabase_mailcatcher
-    image: dockage/mailcatcher:0.8.2
-    ports:
-      - 1025:1025
-      - 1080:1080
+    healthcheck:
+      test: ["CMD-SHELL", 'clickhouse-client --host clickhouse --user "$$CLICKHOUSE_USER" --password "$$CLICKHOUSE_PASSWORD" --database "$$CLICKHOUSE_DB" --query "SELECT 1"']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
 
 volumes:
-  pgdev-data:
-    driver: local
-  clickhousedev-data:
-    driver: local
+  aptabase-keys:
+  postgres-data:
+  clickhouse-data:

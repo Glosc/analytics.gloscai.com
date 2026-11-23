@@ -42,7 +42,47 @@ The easiest and quickest way to get started. A fully managed service by the crea
 
 You can also host Aptabase on your servers. It's free, but you are responsible for maintenance and updates.
 
-[Learn how →](https://github.com/aptabase/self-hosting).
+This repository's production Compose file runs the prebuilt image from
+`ghcr.io/glosc/analytics.gloscai.com` with PostgreSQL and ClickHouse. From the repository root:
+
+```bash
+cp .env.example .env
+chmod 600 .env
+```
+
+Set `BASE_URL` to your public HTTPS URL. Generate `AUTH_SECRET` with `openssl rand -base64 32`
+and generate each database password separately with `openssl rand -hex 32`. Keep `.env` private
+and retain the same secrets across upgrades. The database passwords are used in connection
+strings. The generated hex values avoid connection-string delimiters.
+
+Users register and sign in with a username and password. SMTP is optional. With `SMTP_HOST`
+unset, the app logs notifications. To send email, set `SMTP_HOST`
+and `SMTP_FROM_ADDRESS`, plus `SMTP_USERNAME` and `SMTP_PASSWORD` if your server requires them.
+
+```bash
+docker compose pull
+docker compose up -d
+docker compose logs -f aptabase
+```
+
+Point an HTTPS reverse proxy on the host at `http://127.0.0.1:8080` (or the port set by
+`APTABASE_PORT`). Have the proxy supply the original host and scheme and set the client IP
+headers itself. Verify the app responds at `/healthz`. Both databases use the private Compose
+network.
+
+Publishing a GitHub Release builds the `linux/amd64` and `linux/arm64` images and pushes them
+under the Release tag (for example, `v1.2.3`). The release marked **Latest** on GitHub also
+gets the `latest` image tag. A prerelease can be pulled by its version tag.
+
+To pin a version, set `APTABASE_IMAGE_TAG` in `.env` to the Release tag. Back up both databases
+before upgrading, then run `docker compose pull` and `docker compose up -d`. The app runs
+database migrations on startup.
+
+PostgreSQL, ClickHouse, and the app's session encryption keys are stored in named volumes
+under the `aptabase-production` Compose project. Keep that project name and those volumes
+when upgrading. Running `docker compose down -v` deletes those volumes.
+
+[Upstream self-hosting guide →](https://github.com/aptabase/self-hosting).
 
 ## 🛠️ Contributing
 

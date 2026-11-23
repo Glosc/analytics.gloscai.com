@@ -1,5 +1,7 @@
-obj
-bin
+.git
+.env
+**/obj
+**/bin
 .vs
 .DS_Store
 

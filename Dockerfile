@@ -11,14 +11,14 @@ COPY ./etc/clickhouse /work/etc/clickhouse
 COPY ./etc/geoip /work/etc/geoip
 COPY ./src /work/src
 
-RUN dotnet publish "Aptabase.csproj" -a $TARGETARCH -c Release -o /work/publish /p:UseAppHost=false
+RUN dotnet publish "Aptabase.csproj" -a $TARGETARCH --no-restore -c Release -o /work/publish /p:UseAppHost=false
 
 # WebApp Build
-FROM node:22 AS webapp
+FROM --platform=$BUILDPLATFORM node:22 AS webapp
 WORKDIR /work
 
 COPY ./src/package.json ./src/package-lock.json ./
-RUN npm install
+RUN npm ci
 
 COPY ./src ./
 RUN npm run build

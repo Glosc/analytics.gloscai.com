@@ -4,11 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Aptabase is an open-source privacy-first analytics platform for Mobile, Desktop, and Web apps. It's built as a hybrid .NET 8 backend with a React/TypeScript frontend, using a monolithic architecture where both frontend and backend code live in the `src/` directory.
+Aptabase is an open-source privacy-first analytics platform for Mobile, Desktop, and Web apps. It's built as a hybrid .NET 10 backend with a React/TypeScript frontend, using a monolithic architecture where both frontend and backend code live in the `src/` directory.
 
 ## Tech Stack
 
-**Backend (.NET 8)**
+**Backend (.NET 10)**
 - ASP.NET Core with minimal API/controllers
 - PostgreSQL (primary database) via Npgsql and Dapper
 - ClickHouse or Tinybird (analytics data storage)
@@ -32,17 +32,21 @@ Aptabase is an open-source privacy-first analytics platform for Mobile, Desktop,
 
 ### Initial Setup
 ```bash
+# Start Docker services from the repository root
+docker compose -f docker-compose.dev.yml up -d
+
+# Copy launch settings (PostgreSQL on port 5433 by default)
+cp src/Properties/launchSettings.example.json src/Properties/launchSettings.json
+
 # Install dependencies
 cd src/
 npm install
 dotnet restore
-
-# Start Docker services (PostgreSQL, ClickHouse, Mailcatcher)
-docker compose up -d
-
-# Copy launch settings
-cp src/Properties/launchSettings.example.json src/Properties/launchSettings.json
 ```
+
+Development PostgreSQL uses host port `5433` by default. To use `5432`, set
+`DEV_POSTGRES_PORT=5432` when starting Compose and set `Port=5432` in the launch settings.
+Stop development services with `docker compose -f docker-compose.dev.yml down`.
 
 ### Development
 ```bash
@@ -68,6 +72,9 @@ dotnet build         # From root or src/
 ```bash
 # Run unit tests
 dotnet test tests/UnitTests/
+
+# Use the dev database port for tests that use local Compose services
+export DATABASE_URL='Host=localhost;Port=5433;Username=aptabase;Password=aptabase_pw;Database=aptabase'
 
 # Run integration tests
 dotnet test tests/IntegrationTests/
@@ -161,7 +168,7 @@ All environment variables are centralized in `EnvSettings.cs`. Key variables:
 - `CLICKHOUSE_URL` - ClickHouse connection
 - `TINYBIRD_BASE_URL` + `TINYBIRD_TOKEN` - Tinybird API
 
-**Email:**
+**Email (optional for self-hosting; notifications are logged if `SMTP_HOST` is unset):**
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM_ADDRESS`
 
 **OAuth (optional):**
@@ -169,6 +176,15 @@ All environment variables are centralized in `EnvSettings.cs`. Key variables:
 - `OAUTH_GOOGLE_CLIENT_ID`, `OAUTH_GOOGLE_CLIENT_SECRET`
 
 See `src/Properties/launchSettings.example.json` for development defaults.
+
+### Production Deployment
+
+The default `docker-compose.yml` is production-only and uses the separate `aptabase-production`
+project. See the [self-hosting instructions](./README.md#-self-hosted) and `.env.example` for
+configuration. The stack uses internal PostgreSQL and ClickHouse connections and exposes
+only the app on the host loopback. `APTABASE_IMAGE_TAG` defaults to the stable `latest` tag;
+set it to an exact GitHub Release tag to pin the image. Keep the database and session key
+volumes when replacing or upgrading containers.
 
 ### Rate Limiting
 
